@@ -2,27 +2,207 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  /* Primary Colors */
+  --color-primary: #2B4C7E;
+  --color-primary-hover: #1e3558;
+  --color-primary-active: #152642;
+  
+  /* Secondary Colors */
+  --color-secondary: #E94F37;
+  --color-secondary-hover: #d43a23;
+  --color-secondary-active: #b82e1a;
+  
+  /* Surface Colors - Light Mode */
+  --color-surface: #F8F9FA;
+  --color-surface-container: #FFFFFF;
+  --color-surface-container-high: #F0F1F3;
+  --color-surface-container-highest: #E6E8EC;
+  
+  /* Gray Scale */
+  --color-gray-900: #202531;
+  --color-gray-700: #414957;
+  --color-gray-500: #6B7384;
+  --color-gray-300: #AEB4C2;
+  --color-gray-100: #E6E8EC;
+  
+  /* Semantic Colors */
+  --color-success: #4CAF50;
+  --color-success-hover: #43a047;
+  --color-warning: #FFC107;
+  --color-warning-hover: #ffb300;
+  --color-danger: #D32F2F;
+  --color-danger-hover: #c62828;
+  
+  /* Text Colors - Light Mode */
+  --color-text-primary: #202531;
+  --color-text-secondary: #414957;
+  --color-text-tertiary: #6B7384;
+  --color-text-disabled: #AEB4C2;
+  --color-text-on-primary: #FFFFFF;
+  --color-text-on-secondary: #FFFFFF;
+  
+  /* Border Colors */
+  --color-border: #E6E8EC;
+  --color-border-hover: #AEB4C2;
+  --color-border-focus: #2B4C7E;
+  
+  /* Radius Tokens */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+  
+  /* Motion Tokens */
+  --motion-duration-fast: 150ms;
+  --motion-duration-normal: 200ms;
+  --motion-easing: cubic-bezier(0.2, 0.0, 0, 1);
+  
+  /* Typography Scale */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  
+  --text-h1-size: 42px;
+  --text-h1-weight: 700;
+  --text-h1-line-height: 1.2;
+  --text-h1-letter-spacing: -0.02em;
+  
+  --text-h2-size: 32px;
+  --text-h2-weight: 700;
+  --text-h2-line-height: 1.25;
+  --text-h2-letter-spacing: -0.01em;
+  
+  --text-h3-size: 24px;
+  --text-h3-weight: 600;
+  --text-h3-line-height: 1.3;
+  --text-h3-letter-spacing: 0;
+  
+  --text-h4-size: 20px;
+  --text-h4-weight: 600;
+  --text-h4-line-height: 1.4;
+  --text-h4-letter-spacing: 0;
+  
+  --text-h5-size: 18px;
+  --text-h5-weight: 600;
+  --text-h5-line-height: 1.4;
+  --text-h5-letter-spacing: 0;
+  
+  --text-body-l-size: 16px;
+  --text-body-l-weight: 400;
+  --text-body-l-line-height: 1.5;
+  --text-body-l-letter-spacing: 0;
+  
+  --text-body-m-size: 14px;
+  --text-body-m-weight: 400;
+  --text-body-m-line-height: 1.5;
+  --text-body-m-letter-spacing: 0;
+  
+  --text-body-s-size: 12px;
+  --text-body-s-weight: 400;
+  --text-body-s-line-height: 1.4;
+  --text-body-s-letter-spacing: 0.01em;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+[data-theme="dark"],
+.dark {
+  /* Surface Colors - Dark Mode */
+  --color-surface: #1B1E22;
+  --color-surface-container: #252932;
+  --color-surface-container-high: #2E3239;
+  --color-surface-container-highest: #383D45;
+  
+  /* Text Colors - Dark Mode */
+  --color-text-primary: #E6E8EC;
+  --color-text-secondary: #AEB4C2;
+  --color-text-tertiary: #6B7384;
+  --color-text-disabled: #414957;
+  
+  /* Border Colors - Dark Mode */
+  --color-border: #383D45;
+  --color-border-hover: #6B7384;
+  --color-border-focus: #4A6FA5;
+  
+  /* Shadows - Dark Mode (lighter shadows) */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6), 0 8px 10px -6px rgb(0 0 0 / 0.5);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    font-family: var(--font-family);
+    font-size: var(--text-body-l-size);
+    line-height: var(--text-body-l-line-height);
+    letter-spacing: var(--text-body-l-letter-spacing);
+    transition: background-color var(--motion-duration-normal) var(--motion-easing),
+                color var(--motion-duration-normal) var(--motion-easing);
+  }
+  
+  h1 {
+    font-size: var(--text-h1-size);
+    font-weight: var(--text-h1-weight);
+    line-height: var(--text-h1-line-height);
+    letter-spacing: var(--text-h1-letter-spacing);
+    color: var(--color-text-primary);
+  }
+  
+  h2 {
+    font-size: var(--text-h2-size);
+    font-weight: var(--text-h2-weight);
+    line-height: var(--text-h2-line-height);
+    letter-spacing: var(--text-h2-letter-spacing);
+    color: var(--color-text-primary);
+  }
+  
+  h3 {
+    font-size: var(--text-h3-size);
+    font-weight: var(--text-h3-weight);
+    line-height: var(--text-h3-line-height);
+    letter-spacing: var(--text-h3-letter-spacing);
+    color: var(--color-text-primary);
+  }
+  
+  h4 {
+    font-size: var(--text-h4-size);
+    font-weight: var(--text-h4-weight);
+    line-height: var(--text-h4-line-height);
+    letter-spacing: var(--text-h4-letter-spacing);
+    color: var(--color-text-primary);
+  }
+  
+  h5 {
+    font-size: var(--text-h5-size);
+    font-weight: var(--text-h5-weight);
+    line-height: var(--text-h5-line-height);
+    letter-spacing: var(--text-h5-letter-spacing);
+    color: var(--color-text-primary);
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+@layer utilities {
+  .transition-motion {
+    transition-duration: var(--motion-duration-normal);
+    transition-timing-function: var(--motion-easing);
+  }
+  
+  .transition-motion-fast {
+    transition-duration: var(--motion-duration-fast);
+    transition-timing-function: var(--motion-easing);
+  }
 }
-

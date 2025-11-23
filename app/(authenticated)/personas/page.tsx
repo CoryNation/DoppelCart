@@ -1,26 +1,40 @@
+import Card, {
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import Button from "@/components/ui/button";
+
 export default function PersonasPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Personas</h1>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-          Create Persona
-        </button>
+        <h1 className="text-h2">Personas</h1>
+        <Button>Create Persona</Button>
       </div>
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <p className="text-gray-600 dark:text-gray-400">
-          Personas management will be implemented here.
-        </p>
-        <p className="text-sm text-gray-500 dark:text-gray-500 mt-4">
-          This page will display:
-        </p>
-        <ul className="list-disc list-inside mt-2 text-sm text-gray-500 dark:text-gray-500">
-          <li>List of all user personas</li>
-          <li>Create new persona form</li>
-          <li>Edit persona details</li>
-          <li>Delete persona actions</li>
-        </ul>
-      </div>
+      <Card variant="elevated" padding="lg">
+        <CardHeader>
+          <CardTitle>Manage Your Personas</CardTitle>
+          <CardDescription>
+            Create and manage AI influencer personas
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-body-m text-text-secondary mb-4">
+            Personas management will be implemented here.
+          </p>
+          <p className="text-body-s text-text-tertiary mb-2">
+            This page will display:
+          </p>
+          <ul className="list-disc list-inside space-y-1 text-body-s text-text-tertiary ml-4">
+            <li>List of all user personas</li>
+            <li>Create new persona form</li>
+            <li>Edit persona details</li>
+            <li>Delete persona actions</li>
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }
