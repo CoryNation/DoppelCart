@@ -1,0 +1,150 @@
+#!/usr/bin/env node
+
+/**
+ * GitHub MCP Server for Cursor
+ *
+ * Exposes GitHub operations as MCP tools:
+ * - listCommits
+ * - getCommit
+ * - listPRs
+ * - getPR
+ * - getPRDiff
+ *
+ * Requires a GitHub Personal Access Token (PAT) with "repo:read" access.
+ */
+
+import { createServer } from "@modelcontextprotocol/sdk/server/index.js";
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
+import fetch from "node-fetch";
+
+// Load GitHub token from environment variable
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+if (!GITHUB_TOKEN) {
+  console.error("ERROR: Missing GITHUB_TOKEN environment variable.");
+  process.exit(1);
+}
+
+const server = createServer({
+  name: "github-mcp",
+  version: "1.0.0",
+});
+
+// Reusable GitHub request wrapper
+async function gh(path, params = {}) {
+  const url = `https://api.github.com${path}`;
+  const res = await fetch(url, {
+    ...params,
+    headers: {
+      "Authorization": `Bearer ${GITHUB_TOKEN}`,
+      "Accept": "application/vnd.github+json",
+      "User-Agent": "Cursor-MCP",
+      ...(params.headers || {})
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error(`GitHub API error ${res.status}: ${await res.text()}`);
+  }
+
+  return res.json();
+}
+
+/* ---------------------------------------------------------
+   TOOL: listCommits(repo)
+--------------------------------------------------------- */
+server.tool(
+  new Tool({
+    name: "listCommits",
+    description: "List recent commits for a GitHub repo.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        repo: { type: "string", description: "Format: owner/repo" },
+        branch: { type: "string", default: "main" }
+      },
+      required: ["repo"]
+    },
+  }),
+  async ({ repo, branch }) => {
+    return await gh(`/repos/${repo}/commits?sha=${branch}`);
+  }
+);
+
+/* ---------------------------------------------------------
+   TOOL: listPRs(repo)
+--------------------------------------------------------- */
+server.tool(
+  new Tool({
+    name: "listPRs",
+    description: "List pull requests for a GitHub repo.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        repo: { type: "string" }
+      },
+      required: ["repo"]
+    },
+  }),
+  async ({ repo }) => {
+    return await gh(`/repos/${repo}/pulls?state=open`);
+  }
+);
+
+/* ---------------------------------------------------------
+   TOOL: getPR(repo, prNumber)
+--------------------------------------------------------- */
+server.tool(
+  new Tool({
+    name: "getPR",
+    description: "Get details for a specific pull request.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        repo: { type: "string" },
+        prNumber: { type: "number" }
+      },
+      required: ["repo", "prNumber"]
+    },
+  }),
+  async ({ repo, prNumber }) => {
+    return await gh(`/repos/${repo}/pulls/${prNumber}`);
+  }
+);
+
+/* ---------------------------------------------------------
+   TOOL: getPRDiff(repo, prNumber)
+--------------------------------------------------------- */
+server.tool(
+  new Tool({
+    name: "getPRDiff",
+    description: "Get the diff for a pull request.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        repo: { type: "string" },
+        prNumber: { type: "number" }
+      },
+      required: ["repo", "prNumber"]
+    },
+  }),
+  async ({ repo, prNumber }) => {
+    const url = `https://api.github.com/repos/${repo}/pulls/${prNumber}`;
+    const res = await fetch(url, {
+      headers: {
+        "Authorization": `Bearer ${GITHUB_TOKEN}`,
+        "Accept": "application/vnd.github.diff",
+        "User-Agent": "Cursor-MCP"
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error(`GitHub API diff error ${res.status}: ${await res.text()}`);
+    }
+
+    const diff = await res.text();
+    return { diff };
+  }
+);
+
+// Start the MCP server
+server.start();
