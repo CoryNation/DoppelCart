@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "light" | "dark";
+type Theme = "light" | "dark" | "system";
 
 interface ThemeContextType {
   theme: Theme;
@@ -14,10 +14,16 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({
   children,
-  defaultTheme = "light",
+  defaultTheme = "system",
+  attribute = "class",
+  enableSystem = true,
+  disableTransitionOnChange = false,
 }: {
   children: React.ReactNode;
   defaultTheme?: Theme;
+  attribute?: string;
+  enableSystem?: boolean;
+  disableTransitionOnChange?: boolean;
 }) {
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
   const [mounted, setMounted] = useState(false);
@@ -30,26 +36,52 @@ export function ThemeProvider({
       .matches
       ? "dark"
       : "light";
-    const initialTheme = savedTheme || systemTheme;
+    const initialTheme = savedTheme || (enableSystem ? defaultTheme : "light");
     setThemeState(initialTheme);
-    applyTheme(initialTheme);
-  }, []);
+    applyTheme(initialTheme === "system" ? systemTheme : initialTheme);
+  }, [defaultTheme, enableSystem]);
 
-  const applyTheme = (newTheme: Theme) => {
+  const applyTheme = (newTheme: "light" | "dark") => {
     const root = document.documentElement;
-    if (newTheme === "dark") {
-      root.setAttribute("data-theme", "dark");
-      root.classList.add("dark");
-    } else {
-      root.removeAttribute("data-theme");
-      root.classList.remove("dark");
+    
+    if (disableTransitionOnChange) {
+      const css = document.createElement("style");
+      css.appendChild(
+        document.createTextNode(
+          "*{-webkit-transition:none!important;-moz-transition:none!important;-o-transition:none!important;-ms-transition:none!important;transition:none!important}"
+        )
+      );
+      document.head.appendChild(css);
+      
+      setTimeout(() => {
+        document.head.removeChild(css);
+      }, 1);
     }
+    
+    if (attribute === "class") {
+      if (newTheme === "dark") {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
+    }
+    
+    root.setAttribute("data-theme", newTheme);
   };
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     localStorage.setItem("theme", newTheme);
-    applyTheme(newTheme);
+    
+    if (newTheme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light";
+      applyTheme(systemTheme);
+    } else {
+      applyTheme(newTheme);
+    }
   };
 
   const toggleTheme = () => {
