@@ -14,8 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
+      <body className="bg-background min-h-screen flex flex-col font-sans antialiased">
+        <ThemeProvider>
+          <div className="flex-1">{children}</div>
+        </ThemeProvider>
       </body>
     </html>
   );

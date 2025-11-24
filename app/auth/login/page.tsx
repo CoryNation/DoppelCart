@@ -2,19 +2,17 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase/browserClient";
-import Card, {
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
+import { AuthCard } from "@/components/auth/AuthCard";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import Link from "next/link";
+import { CardContent } from "@/components/ui/card";
+import Card from "@/components/ui/card";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -102,104 +100,66 @@ function LoginForm() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-surface">
-      <div className="z-10 max-w-md w-full">
-        <h1 className="text-h2 text-center mb-8">Log in</h1>
-        <Card variant="elevated" padding="lg">
-          <CardHeader>
-            <CardTitle>Welcome back</CardTitle>
-            <CardDescription>
-              Sign in to your DoppleCart account
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {error && (
-              <div className="p-3 rounded-sm bg-danger/10 border border-danger/20">
-                <p className="text-body-s text-danger">{error}</p>
-              </div>
-            )}
-            {success && (
-              <div className="p-3 rounded-sm bg-success/10 border border-success/20">
-                <p className="text-body-s text-success">{success}</p>
-              </div>
-            )}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <Input
-                {...register("email")}
-                label="Email"
-                type="email"
-                placeholder="you@example.com"
-                variant="border"
-                error={!!errors.email}
-                errorMessage={errors.email?.message}
-                disabled={isLoading}
-              />
-              <Input
-                {...register("password")}
-                label="Password"
-                type="password"
-                placeholder="Enter your password"
-                variant="border"
-                error={!!errors.password}
-                errorMessage={errors.password?.message}
-                disabled={isLoading}
-              />
-              <Button
-                type="submit"
-                fullWidth
-                size="lg"
-                disabled={isLoading}
-                className="mt-4"
-              >
-                {isLoading ? "Signing in..." : "Log in"}
-              </Button>
-            </form>
-
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
-              </div>
-              <div className="relative flex justify-center text-body-s">
-                <span className="px-2 bg-surface-container text-text-tertiary">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              fullWidth
-              onClick={handleGoogleLogin}
-              disabled={isLoading}
-            >
-              Continue with Google
-            </Button>
-
-            <div className="mt-6 space-y-2 text-center">
-              <Link
-                href="/auth/register"
-                className="block text-body-m text-primary hover:underline transition-motion"
-              >
-                Create an account
-              </Link>
-              <Link
-                href="/auth/reset-password"
-                className="block text-body-m text-primary hover:underline transition-motion"
-              >
-                Forgot your password?
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-        <div className="mt-6 text-center">
-          <Link
-            href="/"
-            className="text-body-m text-primary hover:underline transition-motion"
+      <AuthCard
+        title="Log in"
+        description="Sign in to your DoppleCart account"
+        footerText="Don't have an account?"
+        footerLinkText="Create an account"
+        footerLinkHref="/auth/register"
+      >
+        {error && (
+          <div className="p-3 rounded-sm bg-danger/10 border border-danger/20">
+            <p className="text-body-s text-danger">{error}</p>
+          </div>
+        )}
+        {success && (
+          <div className="p-3 rounded-sm bg-success/10 border border-success/20">
+            <p className="text-body-s text-success">{success}</p>
+          </div>
+        )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <Input
+            {...register("email")}
+            label="Email"
+            type="email"
+            placeholder="you@example.com"
+            variant="border"
+            error={!!errors.email}
+            errorMessage={errors.email?.message}
+            disabled={isLoading}
+          />
+          <Input
+            {...register("password")}
+            label="Password"
+            type="password"
+            placeholder="Enter your password"
+            variant="border"
+            error={!!errors.password}
+            errorMessage={errors.password?.message}
+            disabled={isLoading}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            size="lg"
+            disabled={isLoading}
+            className="mt-4"
           >
-            ← Back to home
+            {isLoading ? "Signing in..." : "Log in"}
+          </Button>
+        </form>
+
+        <GoogleAuthButton isLoading={isLoading} onClick={handleGoogleLogin} />
+
+        <div className="mt-2 text-center">
+          <Link
+            href="/auth/reset-password"
+            className="block text-body-m text-primary hover:underline transition-motion"
+          >
+            Forgot your password?
           </Link>
         </div>
-      </div>
+      </AuthCard>
     </main>
   );
 }
@@ -222,4 +182,3 @@ export default function LoginPage() {
     </Suspense>
   );
 }
-

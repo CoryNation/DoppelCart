@@ -2,19 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase/browserClient";
-import Card, {
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
+import { AuthCard } from "@/components/auth/AuthCard";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 
 const registerSchema = z
   .object({
@@ -97,112 +92,71 @@ export default function RegisterPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-surface">
-      <div className="z-10 max-w-md w-full">
-        <h1 className="text-h2 text-center mb-8">Create account</h1>
-        <Card variant="elevated" padding="lg">
-          <CardHeader>
-            <CardTitle>Get started</CardTitle>
-            <CardDescription>
-              Create a new DoppleCart account
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {error && (
-              <div className="p-3 rounded-sm bg-danger/10 border border-danger/20">
-                <p className="text-body-s text-danger">{error}</p>
-              </div>
-            )}
-            {success && (
-              <div className="p-3 rounded-sm bg-success/10 border border-success/20">
-                <p className="text-body-s text-success">{success}</p>
-              </div>
-            )}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <Input
-                {...register("email")}
-                label="Email"
-                type="email"
-                placeholder="you@example.com"
-                variant="border"
-                error={!!errors.email}
-                errorMessage={errors.email?.message}
-                disabled={isLoading}
-              />
-              <Input
-                {...register("password")}
-                label="Password"
-                type="password"
-                placeholder="At least 6 characters"
-                variant="border"
-                error={!!errors.password}
-                errorMessage={errors.password?.message}
-                disabled={isLoading}
-              />
-              <Input
-                {...register("confirmPassword")}
-                label="Confirm Password"
-                type="password"
-                placeholder="Confirm your password"
-                variant="border"
-                error={!!errors.confirmPassword}
-                errorMessage={errors.confirmPassword?.message}
-                disabled={isLoading}
-              />
-              <Button
-                type="submit"
-                fullWidth
-                size="lg"
-                disabled={isLoading}
-                className="mt-4"
-              >
-                {isLoading ? "Creating account..." : "Create account"}
-              </Button>
-            </form>
-
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
-              </div>
-              <div className="relative flex justify-center text-body-s">
-                <span className="px-2 bg-surface-container text-text-tertiary">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              fullWidth
-              onClick={handleGoogleSignup}
-              disabled={isLoading}
-            >
-              Continue with Google
-            </Button>
-
-            <div className="mt-6 text-center">
-              <p className="text-body-m text-text-secondary">
-                Already have an account?{" "}
-                <Link
-                  href="/auth/login"
-                  className="text-primary hover:underline transition-motion"
-                >
-                  Log in
-                </Link>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <div className="mt-6 text-center">
-          <Link
-            href="/"
-            className="text-body-m text-primary hover:underline transition-motion"
+      <AuthCard
+        title="Create account"
+        description="Create a new DoppleCart account"
+        footerText="Already have an account?"
+        footerLinkText="Log in"
+        footerLinkHref="/auth/login"
+      >
+        {error && (
+          <div className="p-3 rounded-sm bg-danger/10 border border-danger/20">
+            <p className="text-body-s text-danger">{error}</p>
+          </div>
+        )}
+        {success && (
+          <div className="p-3 rounded-sm bg-success/10 border border-success/20">
+            <p className="text-body-s text-success">{success}</p>
+          </div>
+        )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <Input
+            {...register("email")}
+            label="Email"
+            type="email"
+            placeholder="you@example.com"
+            variant="border"
+            error={!!errors.email}
+            errorMessage={errors.email?.message}
+            disabled={isLoading}
+          />
+          <Input
+            {...register("password")}
+            label="Password"
+            type="password"
+            placeholder="At least 6 characters"
+            variant="border"
+            error={!!errors.password}
+            errorMessage={errors.password?.message}
+            disabled={isLoading}
+          />
+          <Input
+            {...register("confirmPassword")}
+            label="Confirm Password"
+            type="password"
+            placeholder="Confirm your password"
+            variant="border"
+            error={!!errors.confirmPassword}
+            errorMessage={errors.confirmPassword?.message}
+            disabled={isLoading}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            size="lg"
+            disabled={isLoading}
+            className="mt-4"
           >
-            ← Back to home
-          </Link>
-        </div>
-      </div>
+            {isLoading ? "Creating account..." : "Create account"}
+          </Button>
+        </form>
+
+        <GoogleAuthButton
+          isLoading={isLoading}
+          onClick={handleGoogleSignup}
+          text="Continue with Google"
+        />
+      </AuthCard>
     </main>
   );
 }
-
