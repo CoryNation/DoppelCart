@@ -21,11 +21,6 @@ export default async function AuthenticatedLayout({
       href: "/personas",
       icon: <Users className="h-5 w-5" />,
     },
-    {
-      label: "Profile",
-      href: "/settings/profile",
-      icon: <Settings className="h-5 w-5" />,
-    },
   ];
 
   return (

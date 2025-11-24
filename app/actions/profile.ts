@@ -3,6 +3,8 @@
 import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
 import { getServerUser } from "@/lib/auth/getServerUser";
 import { revalidatePath } from "next/cache";
+import { createSupabaseServiceClient } from "@/lib/supabase/serviceClient";
+import { redirect } from "next/navigation";
 
 export interface ProfileData {
   full_name?: string;
@@ -73,6 +75,27 @@ export async function updatePassword(newPassword: string) {
   if (error) {
     throw new Error(`Failed to update password: ${error.message}`);
   }
+}
+
+/**
+ * Delete the current user's account
+ */
+export async function deleteAccount() {
+  const user = await getServerUser();
+  const supabaseAdmin = createSupabaseServiceClient();
+
+  // Delete the user from Supabase Auth
+  const { error } = await supabaseAdmin.auth.admin.deleteUser(user.id);
+
+  if (error) {
+    throw new Error(`Failed to delete account: ${error.message}`);
+  }
+
+  // Sign out the user to clear session
+  const supabase = await createSupabaseServerClient();
+  await supabase.auth.signOut();
+
+  redirect("/");
 }
 
 

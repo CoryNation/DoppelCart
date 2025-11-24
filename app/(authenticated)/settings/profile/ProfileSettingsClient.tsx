@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase/browserClient";
-import { updateProfile, updatePassword } from "@/app/actions/profile";
+import { updateProfile, updatePassword, deleteAccount } from "@/app/actions/profile";
 import Card, {
   CardHeader,
   CardTitle,
@@ -16,6 +16,7 @@ import Card, {
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
+import { Modal, ModalFooter } from "@/components/ui/modal";
 
 const profileSchema = z.object({
   full_name: z.string().optional(),
@@ -64,6 +65,8 @@ export default function ProfileSettingsClient({
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const {
     register: registerProfile,
@@ -137,6 +140,19 @@ export default function ProfileSettingsClient({
       }
     } catch {
       setProfileError("Failed to connect Google account");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true);
+    try {
+      await deleteAccount();
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete account";
+      setProfileError(errorMessage);
+      setDeleteLoading(false);
+      setIsDeleteModalOpen(false);
     }
   };
 
@@ -359,16 +375,46 @@ export default function ProfileSettingsClient({
               Once you delete your account, there is no going back. Please be
               certain.
             </p>
-            <Button variant="outline" size="md" disabled>
+            <Button
+              variant="destructive"
+              size="md"
+              onClick={() => setIsDeleteModalOpen(true)}
+              disabled={deleteLoading}
+            >
               Delete Account
             </Button>
-            <p className="text-body-s text-text-tertiary mt-2">
-              Account deletion is not yet implemented. Contact support for
-              assistance.
-            </p>
           </div>
         </CardContent>
       </Card>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="Delete Account"
+        description="Are you sure you want to delete your account? This action cannot be undone."
+      >
+        <div className="space-y-4">
+          <p className="text-body-m text-text-primary">
+            This will permanently delete your account and all associated data.
+          </p>
+          <ModalFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteModalOpen(false)}
+              disabled={deleteLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? "Deleting..." : "Delete Account"}
+            </Button>
+          </ModalFooter>
+        </div>
+      </Modal>
     </div>
   );
 }

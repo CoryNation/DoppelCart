@@ -5,13 +5,16 @@ import Card, {
   CardContent,
 } from "@/components/ui/card";
 import Button from "@/components/ui/button";
+import Link from "next/link";
 
 export default function PersonasPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-h2">Personas</h1>
-        <Button>Create Persona</Button>
+        <Button asChild>
+          <Link href="/agents/new">Create Persona</Link>
+        </Button>
       </div>
       <Card variant="elevated" padding="lg">
         <CardHeader>
