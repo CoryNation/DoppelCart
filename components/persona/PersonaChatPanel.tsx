@@ -7,9 +7,10 @@ interface PersonaChatPanelProps {
   messages: ChatMessage[];
   onSend: (content: string) => void;
   isLoading?: boolean;
+  isDisabled?: boolean;
 }
 
-export default function PersonaChatPanel({ messages, onSend, isLoading = false }: PersonaChatPanelProps) {
+export default function PersonaChatPanel({ messages, onSend, isLoading = false, isDisabled = false }: PersonaChatPanelProps) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -23,7 +24,7 @@ export default function PersonaChatPanel({ messages, onSend, isLoading = false }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || isDisabled) return;
     onSend(input);
     setInput('');
   };
@@ -62,11 +63,11 @@ export default function PersonaChatPanel({ messages, onSend, isLoading = false }
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type your response..."
-          disabled={isLoading}
+          disabled={isLoading || isDisabled}
           className="flex-1"
           autoFocus
         />
-        <Button type="submit" disabled={isLoading || !input.trim()}>
+        <Button type="submit" disabled={isLoading || isDisabled || !input.trim()}>
           Send
         </Button>
       </form>

@@ -8,7 +8,6 @@ import Card, {
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
 import { Modal, ModalFooter } from "@/components/ui/modal";
@@ -395,6 +394,7 @@ export default function DesignSystemPage() {
     </div>
   );
 }
+
 
 
 

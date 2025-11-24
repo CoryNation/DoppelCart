@@ -35,10 +35,14 @@ export interface ContentPlan {
  * TODO: Implement with actual LLM calls.
  */
 export async function generateContentPlan(
-  personaId: string,
-  startDate: Date,
-  endDate: Date,
-  frequencyGoal: number
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _personaId: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _startDate: Date,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _endDate: Date,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _frequencyGoal: number
 ): Promise<ContentPlan> {
   // Placeholder implementation
   throw new Error("Not implemented yet");
@@ -49,7 +53,8 @@ export async function generateContentPlan(
  * TODO: Implement with actual LLM calls.
  */
 export async function generateContentItem(
-  input: ContentGenerationInput
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _input: ContentGenerationInput
 ): Promise<ContentItem> {
   // Placeholder implementation
   throw new Error("Not implemented yet");
@@ -60,8 +65,10 @@ export async function generateContentItem(
  * TODO: Implement with actual LLM calls.
  */
 export async function bulkGenerateContent(
-  personaIds: string[],
-  planDuration: { startDate: Date; endDate: Date }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _personaIds: string[],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _planDuration: { startDate: Date; endDate: Date }
 ): Promise<Record<string, ContentPlan>> {
   // Placeholder implementation
   throw new Error("Not implemented yet");

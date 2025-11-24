@@ -1,5 +1,5 @@
 import { Bot, Zap, Share2, Globe } from "lucide-react";
-import Card, { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import Card, { CardContent } from "@/components/ui/card";
 
 export default function SolutionSection() {
   const features = [
@@ -109,7 +109,7 @@ export default function SolutionSection() {
                 Meet your new <span className="text-primary">marketing team</span>.
               </h2>
               <p className="text-body-l text-text-secondary">
-                DoppleCart isn't just a scheduling tool. It's an intelligent
+                DoppleCart isn&apos;t just a scheduling tool. It&apos;s an intelligent
                 layer of agents that understand your brand, create content that
                 resonates, and handle the distribution for you.
               </p>
@@ -136,4 +136,5 @@ export default function SolutionSection() {
     </section>
   );
 }
+
 

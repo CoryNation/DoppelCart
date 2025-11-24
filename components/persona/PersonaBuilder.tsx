@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { PersonaStage, PersonaState, ChatMessage } from '@/types/persona';
+import { PersonaState, ChatMessage } from '@/types/persona';
 import PersonaChatPanel from './PersonaChatPanel';
 import PersonaPreviewPanel from './PersonaPreviewPanel';
 import { Button } from '@/components/ui/button';
 import { savePersonaAction } from '@/app/agents/new/actions';
+
+const MAX_MESSAGES_FOR_MODEL = 12;
 
 export default function PersonaBuilder() {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -16,7 +18,6 @@ export default function PersonaBuilder() {
     },
   ]);
   const [persona, setPersona] = useState<PersonaState | null>(null);
-  const [stage, setStage] = useState<PersonaStage>('initial');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, startTransition] = React.useTransition();
   const [assistantTurns, setAssistantTurns] = useState(0);
@@ -43,6 +44,8 @@ export default function PersonaBuilder() {
       { role: 'user', content },
     ];
 
+    const trimmedMessages = nextMessages.slice(-MAX_MESSAGES_FOR_MODEL);
+
     setMessages(nextMessages);
     setIsLoading(true);
 
@@ -53,10 +56,10 @@ export default function PersonaBuilder() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          messages: nextMessages,
+          messages: trimmedMessages,
           currentPersona: persona,
-          turnLimit: TURN_LIMIT,
-          currentTurn: assistantTurns,
+          assistantTurns: assistantTurns,
+          maxAssistantTurns: TURN_LIMIT,
         }),
       });
 
@@ -67,7 +70,6 @@ export default function PersonaBuilder() {
       const data = await response.json();
       
       setPersona(data.updatedPersona);
-      setStage(data.stage);
       setAssistantTurns((prev) => prev + 1);
       
       setMessages((prev) => [
@@ -103,13 +105,14 @@ export default function PersonaBuilder() {
           messages={messages}
           onSend={handleUserMessage}
           isLoading={isLoading}
+          isDisabled={assistantTurns >= TURN_LIMIT}
         />
       </div>
 
       {/* Right Panel: Preview */}
       <div className="w-1/2 flex flex-col">
         <div className="flex-1 overflow-hidden">
-          <PersonaPreviewPanel persona={persona} stage={stage} />
+          <PersonaPreviewPanel persona={persona} />
         </div>
         <div className="p-4 border-t bg-background">
           <Button 

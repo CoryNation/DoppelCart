@@ -31,7 +31,8 @@ export interface PersonaGenerationOutput {
  * TODO: Implement with actual LLM calls.
  */
 export async function generatePersona(
-  input: PersonaGenerationInput
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _input: PersonaGenerationInput
 ): Promise<PersonaGenerationOutput> {
   // Placeholder implementation
   throw new Error("Not implemented yet");
@@ -42,8 +43,10 @@ export async function generatePersona(
  * TODO: Implement with actual LLM calls.
  */
 export async function refinePersona(
-  personaId: string,
-  refinements: Partial<PersonaGenerationInput>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _personaId: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _refinements: Partial<PersonaGenerationInput>
 ): Promise<PersonaGenerationOutput> {
   // Placeholder implementation
   throw new Error("Not implemented yet");

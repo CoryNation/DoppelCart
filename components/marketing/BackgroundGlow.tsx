@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils/cn";
-
 export function BackgroundGlow() {
   return (
     <div className="absolute top-0 left-1/2 -translate-x-1/2 -z-10 w-full h-full max-w-7xl opacity-30 pointer-events-none">
@@ -8,4 +6,5 @@ export function BackgroundGlow() {
     </div>
   );
 }
+
 

@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { getServerUserOptional } from "@/lib/auth/getServerUser";
 import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
 import Link from "next/link";
@@ -35,7 +34,7 @@ export default async function AuthDemoPage() {
             <CardHeader>
               <CardTitle>You are logged in</CardTitle>
               <CardDescription>
-                Here's your current authentication status
+                Here&apos;s your current authentication status
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

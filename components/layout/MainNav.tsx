@@ -6,3 +6,4 @@ export async function MainNav() {
   return <MainNavClient user={user} />;
 }
 
+

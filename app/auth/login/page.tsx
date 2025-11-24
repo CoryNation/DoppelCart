@@ -70,7 +70,7 @@ function LoginForm() {
 
       router.push("/dashboard");
       router.refresh();
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
       setIsLoading(false);
     }
@@ -92,7 +92,7 @@ function LoginForm() {
         setError(error.message);
         setIsLoading(false);
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
       setIsLoading(false);
     }

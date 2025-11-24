@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,8 +36,14 @@ const passwordSchema = z
 type ProfileFormData = z.infer<typeof profileSchema>;
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
+interface Profile {
+  full_name?: string;
+  company?: string;
+  role?: string;
+}
+
 interface ProfileSettingsClientProps {
-  initialProfile: any;
+  initialProfile: Profile | null;
   userEmail: string;
   userCreatedAt: string;
   emailVerified: boolean;
@@ -91,8 +97,9 @@ export default function ProfileSettingsClient({
       setProfileSuccess(true);
       router.refresh();
       setTimeout(() => setProfileSuccess(false), 3000);
-    } catch (error: any) {
-      setProfileError(error.message || "Failed to update profile");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to update profile";
+      setProfileError(errorMessage);
     } finally {
       setProfileLoading(false);
     }
@@ -108,8 +115,9 @@ export default function ProfileSettingsClient({
       setPasswordSuccess(true);
       resetPasswordForm();
       setTimeout(() => setPasswordSuccess(false), 3000);
-    } catch (error: any) {
-      setPasswordError(error.message || "Failed to update password");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to update password";
+      setPasswordError(errorMessage);
     } finally {
       setPasswordLoading(false);
     }
@@ -127,7 +135,7 @@ export default function ProfileSettingsClient({
       if (error) {
         setProfileError(error.message);
       }
-    } catch (error: any) {
+    } catch {
       setProfileError("Failed to connect Google account");
     }
   };

@@ -121,7 +121,7 @@ export function Modal({
     : null;
 }
 
-export interface ModalFooterProps extends HTMLAttributes<HTMLDivElement> {}
+export type ModalFooterProps = HTMLAttributes<HTMLDivElement>;
 
 export function ModalFooter({
   className,
@@ -140,6 +140,7 @@ export function ModalFooter({
     </div>
   );
 }
+
 
 
 

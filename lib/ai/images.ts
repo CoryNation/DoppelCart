@@ -28,7 +28,8 @@ export interface ImageGenerationOutput {
  * TODO: Implement with actual LLM/image model calls.
  */
 export async function generateImagePrompt(
-  input: ImageGenerationInput
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _input: ImageGenerationInput
 ): Promise<string> {
   // Placeholder implementation
   throw new Error("Not implemented yet");
@@ -39,7 +40,8 @@ export async function generateImagePrompt(
  * TODO: Implement with actual image generation API calls.
  */
 export async function generateImage(
-  input: ImageGenerationInput
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _input: ImageGenerationInput
 ): Promise<ImageGenerationOutput> {
   // Placeholder implementation
   throw new Error("Not implemented yet");

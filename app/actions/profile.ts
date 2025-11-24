@@ -63,7 +63,7 @@ export async function updateProfile(data: ProfileData) {
  * Update the user's password
  */
 export async function updatePassword(newPassword: string) {
-  const user = await getServerUser();
+  await getServerUser(); // Verify user is authenticated
   const supabase = await createSupabaseServerClient();
 
   const { error } = await supabase.auth.updateUser({

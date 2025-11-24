@@ -40,7 +40,7 @@ export default function ProblemSection() {
               </h2>
               <p className="text-body-l text-text-secondary">
                 The modern entrepreneur is expected to be a full-time creator,
-                writer, and community manager. It's an impossible standard that
+                writer, and community manager. It&apos;s an impossible standard that
                 leads to burnout and neglected products.
               </p>
             </div>
@@ -103,4 +103,5 @@ export default function ProblemSection() {
     </section>
   );
 }
+
 

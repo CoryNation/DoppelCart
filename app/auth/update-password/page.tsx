@@ -70,7 +70,7 @@ export default function UpdatePasswordPage() {
 
       // Redirect to login with success message
       router.push("/auth/login?passwordUpdated=true");
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
       setIsLoading(false);
     }
@@ -107,7 +107,7 @@ export default function UpdatePasswordPage() {
           <CardHeader>
             <CardTitle>Set new password</CardTitle>
             <CardDescription>
-              Enter your new password below. Make sure it's at least 6
+              Enter your new password below. Make sure it&apos;s at least 6
               characters long.
             </CardDescription>
           </CardHeader>

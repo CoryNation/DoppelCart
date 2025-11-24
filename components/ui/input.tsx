@@ -12,7 +12,7 @@ export interface InputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, label, error, errorMessage, helperText, variant, ...props }, ref) => {
+  ({ className, type, label, error, errorMessage, helperText, ...props }, ref) => {
     return (
       <div className="w-full space-y-2">
         {label && <Label>{label}</Label>}

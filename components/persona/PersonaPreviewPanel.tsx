@@ -1,13 +1,11 @@
 import React from 'react';
-import { PersonaState, PersonaStage } from '@/types/persona';
-import { Progress } from '@/components/ui/progress'; // Assuming you have a Progress component, otherwise we can inline
+import { PersonaState } from '@/types/persona';
 
 interface PersonaPreviewPanelProps {
   persona: PersonaState | null;
-  stage: PersonaStage;
 }
 
-export default function PersonaPreviewPanel({ persona, stage }: PersonaPreviewPanelProps) {
+export default function PersonaPreviewPanel({ persona }: PersonaPreviewPanelProps) {
   if (!persona) {
     return (
       <div className="flex flex-col h-full items-center justify-center p-6 text-center text-muted-foreground bg-slate-50 dark:bg-slate-900/50">

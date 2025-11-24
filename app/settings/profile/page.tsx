@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { getServerUser } from "@/lib/auth/getServerUser";
 import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
 import ProfileSettingsClient from "./ProfileSettingsClient";
