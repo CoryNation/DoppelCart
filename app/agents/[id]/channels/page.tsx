@@ -3,13 +3,16 @@ import { createSupabaseServerClient } from '@/lib/supabase/serverClient';
 import { redirect } from 'next/navigation';
 import { ChannelSettingsForm } from './ChannelSettingsForm';
 
+// In Next.js 15+, params is a Promise
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default async function AgentChannelsPage({ params }: PageProps) {
+export default async function AgentChannelsPage(props: PageProps) {
+  const params = await props.params;
+
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -74,4 +77,3 @@ export default async function AgentChannelsPage({ params }: PageProps) {
     </div>
   );
 }
-

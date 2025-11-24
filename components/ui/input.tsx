@@ -1,97 +1,25 @@
-import { InputHTMLAttributes, forwardRef } from "react";
-import { cn } from "@/lib/utils/cn";
+import * as React from "react"
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  variant?: "filled" | "border";
-  error?: boolean;
-  errorMessage?: string;
-  label?: string;
-  helperText?: string;
-}
+import { cn } from "@/lib/utils/cn"
 
-const Input = forwardRef<HTMLInputElement, InputProps>(
-  (
-    {
-      className,
-      variant = "border",
-      error = false,
-      errorMessage,
-      label,
-      helperText,
-      id,
-      ...props
-    },
-    ref
-  ) => {
-    const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {}
 
-    const baseStyles =
-      "w-full transition-motion focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed text-text-primary placeholder:text-text-tertiary";
-
-    const variantStyles = {
-      filled:
-        "bg-surface-container-high border-0 rounded-lg px-4 py-2.5 focus:bg-surface-container-highest focus:ring-primary",
-      border:
-        "bg-transparent border-2 rounded-sm px-4 py-2.5 focus:ring-primary",
-    };
-
-    const errorStyles = error
-      ? "border-danger focus:border-danger focus:ring-danger"
-      : "border-border focus:border-border-focus";
-
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, ...props }, ref) => {
     return (
-      <div className="w-full">
-        {label && (
-          <label
-            htmlFor={inputId}
-            className="block text-body-m font-medium text-text-primary mb-1.5"
-          >
-            {label}
-          </label>
+      <input
+        type={type}
+        className={cn(
+          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          className
         )}
-        <input
-          ref={ref}
-          id={inputId}
-          className={cn(
-            baseStyles,
-            variantStyles[variant],
-            errorStyles,
-            className
-          )}
-          aria-invalid={error}
-          aria-describedby={
-            error && errorMessage
-              ? `${inputId}-error`
-              : helperText
-              ? `${inputId}-helper`
-              : undefined
-          }
-          {...props}
-        />
-        {error && errorMessage && (
-          <p
-            id={`${inputId}-error`}
-            className="mt-1.5 text-body-s text-danger"
-            role="alert"
-          >
-            {errorMessage}
-          </p>
-        )}
-        {!error && helperText && (
-          <p id={`${inputId}-helper`} className="mt-1.5 text-body-s text-text-tertiary">
-            {helperText}
-          </p>
-        )}
-      </div>
-    );
+        ref={ref}
+        {...props}
+      />
+    )
   }
-);
+)
+Input.displayName = "Input"
 
-Input.displayName = "Input";
-
-export default Input;
-
-
-
-
-
+export { Input }
