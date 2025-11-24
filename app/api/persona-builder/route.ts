@@ -60,22 +60,19 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const systemMessages = [
-      { role: 'system', content: SYSTEM_PROMPT },
+    const systemMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
+      { role: 'system' as const, content: SYSTEM_PROMPT },
       {
-        role: 'system',
+        role: 'system' as const,
         content: `Current persona JSON (may be partial): ${JSON.stringify(
           currentPersona || {}
         )}`,
       },
     ];
 
-    const apiMessages = [
+    const apiMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
       ...systemMessages,
-      ...messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      })),
+      ...messages,
     ];
 
     const responseContent = await callPersonaBuilderModel(apiMessages);
@@ -121,7 +118,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const typedContent = contentRecord as BuilderResponse;
+    const typedContent = contentRecord as unknown as BuilderResponse;
     return NextResponse.json(typedContent);
 
   } catch (error: unknown) {
