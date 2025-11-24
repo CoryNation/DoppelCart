@@ -4,31 +4,8 @@ import React, { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch'; // Assuming shadcn switch component
+import { Switch } from '@/components/ui/switch';
 import { saveAgentChannels, ChannelConfig } from './actions';
-
-// Minimal Switch component if shadcn/ui one is not present (or import from ui/switch)
-function SimpleSwitch({ checked, onCheckedChange }: { checked: boolean; onCheckedChange: (c: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onCheckedChange(!checked)}
-      className={`
-        relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
-        ${checked ? 'bg-primary' : 'bg-input'}
-      `}
-    >
-      <span
-        className={`
-          inline-block h-4 w-4 transform rounded-full bg-background transition-transform
-          ${checked ? 'translate-x-6' : 'translate-x-1'}
-        `}
-      />
-    </button>
-  );
-}
 
 interface Channel {
   id: string;
@@ -116,7 +93,7 @@ export function ChannelSettingsForm({
                   </div>
                   <h3 className="font-semibold text-lg">{channel.name}</h3>
                 </div>
-                <SimpleSwitch
+                <Switch
                   checked={config.enabled}
                   onCheckedChange={(checked) => handleToggle(channel.id, checked)}
                 />
