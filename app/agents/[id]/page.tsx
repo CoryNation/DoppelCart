@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Card, { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import Badge from "@/components/ui/badge";
 import { ResonanceResearchLinker } from "./ResonanceResearchLinker";
 
 export default async function AgentDetailPage({ params }: { params: { id: string } }) {

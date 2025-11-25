@@ -21,11 +21,13 @@ export default function PersonaPreviewPanel({ persona }: PersonaPreviewPanelProp
         {/* Avatar */}
         <div className="shrink-0">
           <div className="w-32 h-32 rounded-lg border bg-background overflow-hidden relative">
-            <img 
-              src={persona.avatar_image_url || "/images/avatar-placeholder.svg"} 
-              alt={persona.display_name || "Persona Avatar"}
-              className="w-full h-full object-cover"
-            />
+          {/* Using img for external URLs to avoid configuring next/image domains for everything */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src={persona.avatar_image_url || "/images/avatar-placeholder.svg"} 
+            alt={persona.display_name || "Persona Avatar"}
+            className="w-full h-full object-cover"
+          />
           </div>
         </div>
         

@@ -86,7 +86,7 @@ export async function POST(
       }
 
       return NextResponse.json(updatedResearch);
-    } catch (aiError: any) {
+    } catch (aiError: unknown) {
       console.error("AI Rerun failed:", aiError);
 
       // 4b. Update with failure
@@ -94,7 +94,7 @@ export async function POST(
         .from("resonance_research")
         .update({
           status: "failed",
-          error_message: aiError.message || "Unknown error during AI rerun",
+          error_message: aiError instanceof Error ? aiError.message : "Unknown error during AI rerun",
           last_run_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })

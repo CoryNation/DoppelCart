@@ -1,10 +1,5 @@
 import PersonaBuilder from '@/components/persona/PersonaBuilder';
 import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
-import { ResonanceResearchDetail } from '@/types/resonance'; // We might need to export this type or redefine it
-// Wait, I didn't export `ResonanceResearchDetail` from types/resonance.ts, I defined it locally in the page component.
-// I should probably move that type to types/resonance.ts or just define a subset here.
-// Let's check types/resonance.ts content again.
-
 import { ResonanceResearchResult } from '@/types/resonance';
 
 interface ResonanceContext {

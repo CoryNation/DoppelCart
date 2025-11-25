@@ -38,8 +38,20 @@ export function ThemeProvider({
       : "light";
     const initialTheme = savedTheme || (enableSystem ? defaultTheme : "light");
     setThemeState(initialTheme);
-    applyTheme(initialTheme === "system" ? systemTheme : initialTheme);
-  }, [defaultTheme, enableSystem]);
+    
+    // Inline logic of applyTheme instead of calling it to avoid dependency issues
+    const themeToApply = initialTheme === "system" ? systemTheme : initialTheme;
+    const root = document.documentElement;
+    if (attribute === "class") {
+        if (themeToApply === "dark") {
+            root.classList.add("dark");
+        } else {
+            root.classList.remove("dark");
+        }
+    }
+    root.setAttribute("data-theme", themeToApply);
+    
+  }, [defaultTheme, enableSystem, attribute]);
 
   const applyTheme = (newTheme: "light" | "dark") => {
     const root = document.documentElement;

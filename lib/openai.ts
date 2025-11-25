@@ -150,7 +150,7 @@ Respond with JSON ONLY (no markdown or commentary).`;
 
 export async function runResonanceResearch(
   userPrompt: string,
-  businessContext?: any
+  businessContext?: Record<string, unknown>
 ): Promise<ResonanceResearchResult> {
   const userMessage = `User description:\n${userPrompt}\n\nStructured context (may be empty):\n${JSON.stringify(
     businessContext ?? {}

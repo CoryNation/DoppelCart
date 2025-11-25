@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Link as LinkIcon, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"; // Assuming you have shadcn select
+// import {
+//   Select,
+//   // SelectContent,
+//   // SelectItem,
+//   // SelectTrigger,
+//   // SelectValue,
+// } from "@/components/ui/select"; // Assuming you have shadcn select
 // If Select isn't available, we'll use a native select or similar. 
 // Assuming Select is standard shadcn setup. If not, I can adjust.
 

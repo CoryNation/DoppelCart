@@ -75,7 +75,7 @@ export async function PUT(
     const { title, initial_prompt } = body;
 
     // Only update allowed fields if they are provided
-    const updates: Record<string, any> = {
+    const updates: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
     if (title !== undefined) updates.title = title;

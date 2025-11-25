@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Settings } from "lucide-react";
+import { LayoutDashboard, Users } from "lucide-react";
 import { getServerUser } from "@/lib/auth/getServerUser";
 import AuthenticatedLayoutClient from "@/components/auth/AuthenticatedLayoutClient";
 

@@ -3,7 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
 import { runResonanceResearch } from "@/lib/openai";
 import { ResonanceResearchListItem } from "@/types/resonance";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const supabase = await createSupabaseServerClient();
     const {
@@ -32,14 +32,14 @@ export async function GET(req: NextRequest) {
 
     // Map the result to include persona_count as a number
     const researchList: ResonanceResearchListItem[] = (data || []).map(
-      (item: any) => {
+      (item: Record<string, any>) => {
         const { resonance_research_personas, ...rest } = item;
         return {
           ...rest,
           persona_count: resonance_research_personas?.[0]?.count ?? 0,
         };
       }
-    );
+    ) as ResonanceResearchListItem[];
 
     return NextResponse.json(researchList);
   } catch (error) {
@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json(updatedResearch);
 
-    } catch (aiError: any) {
+    } catch (aiError: unknown) {
       console.error("AI Research failed:", aiError);
 
       // 3b. Update with failure
@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
         .from("resonance_research")
         .update({
           status: "failed",
-          error_message: aiError.message || "Unknown error during AI research",
+          error_message: aiError instanceof Error ? aiError.message : "Unknown error during AI research",
           last_run_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })

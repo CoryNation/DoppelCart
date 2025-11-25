@@ -10,8 +10,7 @@ import {
   Save,
   Play,
   UserPlus,
-  ChevronDown,
-  ChevronUp,
+  ArrowRight
 } from "lucide-react";
 
 import Card, {
@@ -22,7 +21,7 @@ import Card, {
   CardTitle,
 } from "@/components/ui/card";
 import Button from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import Badge from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { ResonanceResearchResult } from "@/types/resonance";
@@ -62,13 +61,32 @@ export default function ResonanceDetailPage({
   const [prompt, setPrompt] = useState("");
   const [title, setTitle] = useState("");
   const [saving, setSaving] = useState(false);
-  const [rerunning, setRerunning] = useState(false);
+  // const [rerunning, setRerunning] = useState(false);
 
   useEffect(() => {
-    fetchResearch();
-  }, [params.id]);
+    const fetchResearch = async () => {
+      try {
+        const res = await fetch(`/api/resonance/${params.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setResearch(data);
+          setPrompt(data.initial_prompt);
+          setTitle(data.title);
+        } else {
+          // Handle 404/403
+          router.push("/resonance");
+        }
+      } catch (error) {
+        console.error("Failed to fetch research:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchResearch = async () => {
+    fetchResearch();
+  }, [params.id, router]);
+
+  const handleFetchResearch = async () => {
     try {
       const res = await fetch(`/api/resonance/${params.id}`);
       if (res.ok) {
@@ -76,14 +94,9 @@ export default function ResonanceDetailPage({
         setResearch(data);
         setPrompt(data.initial_prompt);
         setTitle(data.title);
-      } else {
-        // Handle 404/403
-        router.push("/resonance");
       }
     } catch (error) {
       console.error("Failed to fetch research:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -118,7 +131,6 @@ export default function ResonanceDetailPage({
 
   const handleRerun = async () => {
     if (!research) return;
-    setRerunning(true);
     // Optimistic update
     setResearch((prev) => (prev ? { ...prev, status: "running" } : null));
 
@@ -131,14 +143,13 @@ export default function ResonanceDetailPage({
         const updated = await res.json();
         setResearch((prev) => (prev ? { ...prev, ...updated } : null));
       } else {
-        fetchResearch(); // Revert on failure
+        handleFetchResearch(); // Revert on failure
       }
     } catch (error) {
       console.error("Error rerunning:", error);
-      fetchResearch();
-    } finally {
-      setRerunning(false);
+      handleFetchResearch();
     }
+  };
   };
 
   const handleDelete = async () => {
