@@ -1,28 +1,81 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PersonaState, ChatMessage } from '@/types/persona';
 import PersonaChatPanel from './PersonaChatPanel';
 import PersonaPreviewPanel from './PersonaPreviewPanel';
 import { Button } from '@/components/ui/button';
 import { savePersonaAction } from '@/app/agents/new/actions';
+import { ResonanceResearchResult } from '@/types/resonance';
+
+interface ResonanceContext {
+  id: string;
+  title: string;
+  blueprint: ResonanceResearchResult['persona_blueprint'];
+  archetype?: ResonanceResearchResult['winning_persona_archetypes'][0];
+}
+
+interface PersonaBuilderProps {
+  resonanceContext?: ResonanceContext | null;
+}
 
 const MAX_MESSAGES_FOR_MODEL = 12;
 
-export default function PersonaBuilder() {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: 'assistant',
-      content:
-        "Hey! Let's design your social persona. First: what is this persona mainly for? (e.g., grow an audience around AI, promote a product, rally people to a cause, etc.)",
-    },
-  ]);
+export default function PersonaBuilder({ resonanceContext }: PersonaBuilderProps) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [persona, setPersona] = useState<PersonaState | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, startTransition] = React.useTransition();
   const [assistantTurns, setAssistantTurns] = useState(0);
 
   const TURN_LIMIT = 20;
+
+  // Initialize with resonance data if available
+  useEffect(() => {
+    if (resonanceContext) {
+      const { blueprint, archetype } = resonanceContext;
+      
+      // Map resonance data to PersonaState
+      const initialPersona: PersonaState = {
+        display_name: blueprint.working_name,
+        // Using tagline as bio start or goal context
+        biography: `${blueprint.tagline}\n\n${archetype?.description || ''}`,
+        stats: {
+           // Default stats, maybe infer from tone later?
+           charisma: 50,
+           logic: 50,
+           humor: 50,
+           warmth: 50,
+           edge: 50,
+           creativity: 50
+        },
+        goals: blueprint.signature_content_types, // Using content types as initial goals/focus
+        demographics: {},
+        personality: {
+          tone: blueprint.default_tone,
+          bigFive: {}
+        },
+      };
+
+      setPersona(initialPersona);
+
+      setMessages([
+        {
+          role: 'assistant',
+          content: `I see you're building a persona based on the "${resonanceContext.title}" research. I've pre-filled some details from the "${archetype?.name || 'recommended'}" archetype. How would you like to refine "${blueprint.working_name}" further?`,
+        },
+      ]);
+    } else {
+      // Default initialization
+      setMessages([
+        {
+          role: 'assistant',
+          content:
+            "Hey! Let's design your social persona. First: what is this persona mainly for? (e.g., grow an audience around AI, promote a product, rally people to a cause, etc.)",
+        },
+      ]);
+    }
+  }, [resonanceContext]);
 
   const handleUserMessage = async (content: string) => {
     if (!content.trim()) return;
@@ -92,8 +145,12 @@ export default function PersonaBuilder() {
 
   const handleSave = () => {
     if (!persona) return;
-    startTransition(() => {
-      savePersonaAction(persona);
+    startTransition(async () => {
+      try {
+        await savePersonaAction(persona, resonanceContext?.id);
+      } catch (error) {
+        console.error("Error saving persona:", error);
+      }
     });
   };
 

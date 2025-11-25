@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/serverClient';
 import { PersonaState } from '@/types/persona';
 import { redirect } from 'next/navigation';
 
-export async function savePersonaAction(persona: PersonaState) {
+export async function savePersonaAction(persona: PersonaState, resonanceResearchId?: string) {
   const supabase = await createSupabaseServerClient();
 
   const {
@@ -35,7 +35,7 @@ export async function savePersonaAction(persona: PersonaState) {
   const agentId = agentData.id;
 
   // Insert into personas table
-  const { error: personaError } = await supabase.from('personas').insert({
+  const { data: personaData, error: personaError } = await supabase.from('personas').insert({
     agent_id: agentId,
     display_name: persona.display_name,
     avatar_image_url: persona.avatar_image_url,
@@ -46,16 +46,32 @@ export async function savePersonaAction(persona: PersonaState) {
     personality: persona.personality,
     biography: persona.biography,
     raw_definition: JSON.stringify(persona),
-  });
+  }).select('id').single();
 
-  if (personaError) {
+  if (personaError || !personaData) {
     console.error('Error creating persona:', personaError);
     // Cleanup agent if persona creation fails
     await supabase.from('agents').delete().eq('id', agentId);
     throw new Error('Failed to create persona record');
   }
 
+  // If we have a resonance research ID, link it
+  if (resonanceResearchId) {
+    const { error: linkError } = await supabase
+      .from('resonance_research_personas')
+      .upsert(
+        {
+          research_id: resonanceResearchId,
+          persona_id: personaData.id,
+        },
+        { onConflict: "research_id, persona_id" }
+      );
+
+    if (linkError) {
+      console.error('Error linking persona to resonance research:', linkError);
+      // We don't fail the whole request if linking fails, just log it.
+    }
+  }
+
   redirect(`/agents/${agentId}/channels`);
 }
-
-
