@@ -47,10 +47,6 @@ export async function refreshRedditTokenIfNeeded(
     return null;
   }
 
-  if (!account.refresh_token_encrypted) {
-    throw new Error("No refresh token available for Reddit account");
-  }
-
   const supabase = createSupabaseServiceClient();
 
   // Fetch the full account record with encrypted tokens
@@ -64,8 +60,14 @@ export async function refreshRedditTokenIfNeeded(
     throw new Error("Failed to fetch account for token refresh");
   }
 
+  // Check if refresh token exists (encrypted fields are not in the public type)
+  const refreshTokenEncrypted = (fullAccount as unknown as { refresh_token_encrypted: string | null }).refresh_token_encrypted;
+  if (!refreshTokenEncrypted) {
+    throw new Error("No refresh token available for Reddit account");
+  }
+
   const refreshToken = decryptSecret(
-    byteaToBuffer(fullAccount.refresh_token_encrypted as unknown as string)
+    byteaToBuffer(refreshTokenEncrypted as unknown as string)
   );
 
   if (!refreshToken) {
