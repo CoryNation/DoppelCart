@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
 import { postCampaignContentToReddit } from "@/lib/campaigns/posting";
-import { mapCampaignContentRow } from "@/lib/campaigns/mappers";
 
 interface RouteContext {
   params: Promise<{ contentId: string }>;

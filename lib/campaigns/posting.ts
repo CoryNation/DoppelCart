@@ -1,10 +1,8 @@
 import { createSupabaseServiceClient } from "@/lib/supabase/serviceClient";
-import {
-  submitRedditTextPost,
-  type RedditPostInput,
-} from "@/lib/social/redditClient";
+import { submitRedditTextPost } from "@/lib/social/redditClient";
 import { mapCampaignContentRow } from "@/lib/campaigns/mappers";
 import type { CampaignContent } from "@/types/campaign";
+import type { PersonaSocialAccount } from "@/types/social";
 
 /**
  * Validates and sanitizes a subreddit name.
@@ -70,7 +68,7 @@ export function validateRedditContent(
 async function findRedditAccountForPost(
   post: CampaignContent,
   userId?: string
-): Promise<{ id: string; account: any } | null> {
+): Promise<{ id: string; account: PersonaSocialAccount } | null> {
   const supabase = createSupabaseServiceClient();
 
   // If persona_social_account_id is set, use that directly
@@ -95,11 +93,13 @@ async function findRedditAccountForPost(
     }
 
     // Verify user ownership if userId provided
-    if (userId && account.personas?.user_id !== userId) {
+    if (userId && (account.personas as { user_id: string } | null)?.user_id !== userId) {
       return null;
     }
 
-    return { id: account.id, account };
+    // Extract account without the join
+    const { personas, ...accountData } = account;
+    return { id: account.id, account: accountData as PersonaSocialAccount };
   }
 
   // Otherwise, find by persona_id and verify ownership
@@ -131,12 +131,14 @@ async function findRedditAccountForPost(
 
   // If multiple accounts, prefer the most recently used one
   const sortedAccounts = accounts.sort((a, b) => {
-    const aTime = a.last_token_refresh_at || a.created_at;
-    const bTime = b.last_token_refresh_at || b.created_at;
+    const aTime = (a.last_token_refresh_at as string | null) || (a.created_at as string);
+    const bTime = (b.last_token_refresh_at as string | null) || (b.created_at as string);
     return new Date(bTime).getTime() - new Date(aTime).getTime();
   });
 
-  return { id: sortedAccounts[0].id, account: sortedAccounts[0] };
+  // Extract account without the join
+  const { personas, ...accountData } = sortedAccounts[0];
+  return { id: sortedAccounts[0].id, account: accountData as PersonaSocialAccount };
 }
 
 /**
