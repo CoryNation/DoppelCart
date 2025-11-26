@@ -216,7 +216,7 @@ export async function postCampaignContentToReddit(
 
   // Extract and validate subreddit
   const platformOptions = post.platform_options || {};
-  const contentJson = post.content_json as Record<string, unknown>;
+  const contentJson = post.content_json as unknown as Record<string, unknown>;
   const subredditRaw =
     (platformOptions.subreddit as string) ||
     (platformOptions.sr as string) ||
