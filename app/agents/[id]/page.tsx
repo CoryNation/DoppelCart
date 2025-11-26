@@ -2,9 +2,10 @@ import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import Card, { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import Card, { CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
-import { ResonanceResearchLinker } from "./ResonanceResearchLinker";
+import { ResonanceResearchLinker, Study } from "./ResonanceResearchLinker";
+import { SocialConnectionsSection } from "./SocialConnectionsSection";
 
 export default async function AgentDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createSupabaseServerClient();
@@ -51,7 +52,17 @@ export default async function AgentDetailPage({ params }: { params: { id: string
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
-  const linkedStudies = linkedResearch?.map(l => l.resonance_research) || [];
+  const linkedStudies = (linkedResearch ?? [])
+    .map((record) => {
+      const research = (record as {
+        resonance_research: Study | Study[];
+      }).resonance_research;
+      if (Array.isArray(research)) {
+        return research[0];
+      }
+      return research;
+    })
+    .filter(Boolean) as Study[];
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8 max-w-5xl">
@@ -100,6 +111,9 @@ export default async function AgentDetailPage({ params }: { params: { id: string
                 </div>
              </CardContent>
            </Card>
+
+          {/* Social Connections Section */}
+          <SocialConnectionsSection personaId={persona.id} />
         </div>
 
         {/* Sidebar */}
@@ -138,4 +152,3 @@ export default async function AgentDetailPage({ params }: { params: { id: string
     </div>
   );
 }
-

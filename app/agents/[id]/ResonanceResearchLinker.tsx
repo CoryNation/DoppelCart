@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 // If Select isn't available, we'll use a native select or similar. 
 // Assuming Select is standard shadcn setup. If not, I can adjust.
 
-interface Study {
+export interface Study {
   id: string;
   title: string;
   created_at: string;
