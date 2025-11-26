@@ -98,7 +98,8 @@ async function findRedditAccountForPost(
     }
 
     // Extract account without the join
-    const { personas, ...accountData } = account;
+    const { personas: _personas, ...accountData } = account;
+    void _personas; // Explicitly mark as intentionally unused
     return { id: account.id, account: accountData as PersonaSocialAccount };
   }
 
@@ -137,7 +138,8 @@ async function findRedditAccountForPost(
   });
 
   // Extract account without the join
-  const { personas, ...accountData } = sortedAccounts[0];
+  const { personas: _personas, ...accountData } = sortedAccounts[0];
+  void _personas; // Explicitly mark as intentionally unused
   return { id: sortedAccounts[0].id, account: accountData as PersonaSocialAccount };
 }
 

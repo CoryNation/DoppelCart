@@ -71,15 +71,16 @@ export async function GET(req: NextRequest) {
 
     // Clean up the response to remove the joined table data if not part of the type
     // and cast to PersonaSocialAccount[]
+    // Note: Supabase returns personas as an array when using !inner join
     type PersonaAccountRow = PersonaSocialAccount & {
-      personas?: { user_id: string } | null;
+      personas?: { user_id: string }[] | { user_id: string } | null;
       metadata?: Record<string, unknown> | null;
     };
 
     const accounts: PersonaSocialAccount[] = (
-      (data as PersonaAccountRow[] | null) ?? []
-    ).map(({ personas, metadata, ...account }) => {
-      void personas;
+      (data as unknown as PersonaAccountRow[] | null) ?? []
+    ).map(({ personas: _personas, metadata, ...account }) => {
+      void _personas; // Explicitly mark as intentionally unused
       return {
         ...account,
         metadata: metadata ?? {},
