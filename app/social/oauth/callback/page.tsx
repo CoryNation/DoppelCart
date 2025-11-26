@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function SocialOAuthCallbackPage() {
+function SocialOAuthCallbackContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -99,6 +99,24 @@ export default function SocialOAuthCallbackPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function SocialOAuthCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-screen flex flex-col items-center justify-center space-y-4 text-center px-4">
+          <div className="animate-pulse">
+            <p className="text-base font-medium text-foreground">
+              Loading…
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <SocialOAuthCallbackContent />
+    </Suspense>
   );
 }
 
