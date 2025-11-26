@@ -61,13 +61,13 @@ export async function refreshRedditTokenIfNeeded(
   }
 
   // Check if refresh token exists (encrypted fields are not in the public type)
-  const refreshTokenEncrypted = (fullAccount as unknown as { refresh_token_encrypted: string | null }).refresh_token_encrypted;
-  if (!refreshTokenEncrypted) {
+  const refreshTokenEncryptedField = (fullAccount as unknown as { refresh_token_encrypted: string | null }).refresh_token_encrypted;
+  if (!refreshTokenEncryptedField) {
     throw new Error("No refresh token available for Reddit account");
   }
 
   const refreshToken = decryptSecret(
-    byteaToBuffer(refreshTokenEncrypted as unknown as string)
+    byteaToBuffer(refreshTokenEncryptedField as unknown as string)
   );
 
   if (!refreshToken) {
