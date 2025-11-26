@@ -12,8 +12,11 @@ const CampaignPostQuerySchema = z.object({
 
 const CampaignPostContentSchema = z
   .object({
+    title: z.string().min(1).optional(),
     text: z.string().min(1),
+    image_prompt: z.string().optional().nullable(),
     image_url: z.string().url().optional().nullable(),
+    recommended_platforms: z.array(z.string()).optional(),
     prompt_metadata: z.record(z.unknown()).optional(),
   })
   .passthrough();
@@ -119,10 +122,15 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const posts: CampaignPost[] = (data || []).map((row: any) => {
-      const { campaigns, ...post } = row;
-      return post;
-    });
+    type CampaignPostRow = CampaignPost & {
+      campaigns?: { user_id: string } | null;
+    };
+
+    const posts =
+      ((data as CampaignPostRow[] | null) ?? []).map((row) => {
+        const { campaigns: _campaigns, ...post } = row;
+        return post as CampaignPost;
+      });
 
     return NextResponse.json(posts);
   } catch (error) {
@@ -290,8 +298,6 @@ export async function PATCH(req: NextRequest) {
         { status: 404 }
       );
     }
-
-    const { campaigns, ...post } = postRecord as any;
 
     const normalizedUpdates = {
       ...updates,

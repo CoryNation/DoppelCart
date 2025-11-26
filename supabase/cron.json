@@ -1,0 +1,7 @@
+[
+  {
+    "schedule": "*/1 * * * *",
+    "function": "postScheduler"
+  }
+]
+

@@ -1,6 +1,11 @@
-import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
+import {
+  mapCampaignRow,
+  type DbCampaignRow,
+} from "@/lib/campaigns/mappers";
+import type { Campaign } from "@/types/campaign";
 import Card, {
   CardContent,
   CardDescription,
@@ -10,21 +15,9 @@ import Card, {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-interface Campaign {
-  id: string;
-  persona_id: string;
-  name: string;
-  status: string;
-  objective: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface Persona {
-  id: string;
-  display_name: string;
+interface CampaignListItem extends Campaign {
+  content_count: number;
+  persona_name?: string;
 }
 
 export default async function CampaignsPage() {
@@ -37,32 +30,56 @@ export default async function CampaignsPage() {
     return notFound();
   }
 
-  const { data: personas } = await supabase
-    .from("personas")
-    .select("id, display_name")
-    .eq("user_id", user.id);
+  const [{ data: personas }, { data, error }] = await Promise.all([
+    supabase
+      .from("personas")
+      .select("id, display_name")
+      .eq("user_id", user.id),
+    supabase
+      .from("campaigns")
+      .select(
+        `
+        *,
+        campaign_posts(count)
+      `
+      )
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  if (error) {
+    console.error("Failed to load campaigns", error);
+    throw new Error("Unable to load campaigns");
+  }
 
   const personaMap =
-    personas?.reduce<Record<string, Persona>>((acc, persona) => {
-      acc[persona.id] = persona as Persona;
+    personas?.reduce<Record<string, string>>((acc, persona) => {
+      acc[persona.id] = persona.display_name;
       return acc;
     }, {}) ?? {};
 
-  const { data: campaigns } = await supabase
-    .from("campaigns")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+  type CampaignRowWithCount = DbCampaignRow & {
+    campaign_posts?: { count?: number }[];
+  };
 
-  const campaignList = (campaigns || []) as Campaign[];
+  const campaigns: CampaignListItem[] =
+    ((data as CampaignRowWithCount[] | null) ?? []).map((row) => {
+      const mapped = mapCampaignRow(row);
+      const countEntry = row.campaign_posts?.[0];
+      return {
+        ...mapped,
+        content_count: countEntry?.count ?? 0,
+        persona_name: personaMap[mapped.persona_id],
+      };
+    });
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold">Campaigns</h1>
           <p className="text-muted-foreground">
-            Plan and track persona-led campaigns across social platforms.
+            Grid of every persona-led campaign across your platforms.
           </p>
         </div>
         <Button asChild>
@@ -70,58 +87,67 @@ export default async function CampaignsPage() {
         </Button>
       </div>
 
-      {campaignList.length === 0 ? (
+      {campaigns.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>No campaigns yet</CardTitle>
+            <CardTitle>Create your first campaign</CardTitle>
             <CardDescription>
-              Create your first campaign to coordinate content across channels.
+              Spin up a targeted initiative, then let AI draft channel-ready
+              content.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/campaigns/new">Create campaign</Link>
+              <Link href="/campaigns/new">Start a campaign</Link>
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {campaignList.map((campaign) => (
-            <Card key={campaign.id}>
-              <CardHeader className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <CardTitle>{campaign.name}</CardTitle>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {campaigns.map((campaign) => (
+            <Card key={campaign.id} className="h-full">
+              <CardHeader className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-xl">{campaign.name}</CardTitle>
                   <Badge variant="outline" className="capitalize">
                     {campaign.status}
                   </Badge>
                 </div>
-                <CardDescription>
-                  Persona: {personaMap[campaign.persona_id]?.display_name}
+                <CardDescription className="flex flex-wrap items-center gap-2 text-sm">
+                  <span className="font-medium">Persona:</span>
+                  <span>{campaign.persona_name ?? "Unknown"}</span>
                 </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {campaign.objective && (
+                {campaign.description && (
                   <p className="text-sm text-muted-foreground">
-                    {campaign.objective}
+                    {campaign.description}
                   </p>
                 )}
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {campaign.target_platforms.length === 0 ? (
+                    <Badge variant="secondary">No platforms selected</Badge>
+                  ) : (
+                    campaign.target_platforms.map((platform) => (
+                      <Badge key={platform} variant="secondary">
+                        {platform}
+                      </Badge>
+                    ))
+                  )}
+                </div>
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>{campaign.content_count} content items</span>
                   <span>
-                    Start:{" "}
-                    {campaign.start_date
-                      ? new Date(campaign.start_date).toLocaleDateString()
-                      : "TBD"}
-                  </span>
-                  <span>
-                    End:{" "}
-                    {campaign.end_date
-                      ? new Date(campaign.end_date).toLocaleDateString()
-                      : "TBD"}
+                    Updated{" "}
+                    {new Date(campaign.updated_at).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                    })}
                   </span>
                 </div>
                 <div className="flex justify-end">
                   <Button variant="outline" asChild>
-                    <Link href={`/campaigns/${campaign.id}`}>View campaign</Link>
+                    <Link href={`/campaigns/${campaign.id}`}>Open</Link>
                   </Button>
                 </div>
               </CardContent>

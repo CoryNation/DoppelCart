@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
-import { Campaign } from "@/types/social";
+import {
+  mapCampaignRow,
+  upsertTargetPlatforms,
+  type DbCampaignRow,
+} from "@/lib/campaigns/mappers";
 
 const CampaignQuerySchema = z.object({
   personaId: z.string().uuid().optional(),
@@ -9,20 +13,10 @@ const CampaignQuerySchema = z.object({
 });
 
 const CampaignCreateSchema = z.object({
-  persona_id: z.string().uuid(),
-  name: z.string().min(1).max(200),
-  goal: z.string().max(2000).optional().nullable(),
-  notes: z.string().max(4000).optional().nullable(),
-  status: z
-    .enum(["draft", "active", "paused", "completed", "archived"])
-    .optional(),
-  objective: z.string().max(2000).optional().nullable(),
-  start_date: z.string().datetime().optional().nullable(),
-  end_date: z.string().datetime().optional().nullable(),
-  timezone: z.string().max(120).optional().nullable(),
-  metrics: z.record(z.unknown()).optional(),
-  budget_cents: z.number().int().optional().nullable(),
-  budget_currency: z.string().length(3).optional().nullable(),
+  personaId: z.string().uuid(),
+  title: z.string().min(1).max(200),
+  description: z.string().max(2000).optional().nullable(),
+  targetPlatforms: z.array(z.string().min(1)).min(1).max(6),
 });
 
 export async function GET(req: NextRequest) {
@@ -37,23 +31,28 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const queryResult = CampaignQuerySchema.safeParse({
-      personaId: searchParams.get("personaId") || undefined,
-      status: searchParams.get("status") || undefined,
+    const parsed = CampaignQuerySchema.safeParse({
+      personaId: searchParams.get("personaId") ?? undefined,
+      status: searchParams.get("status") ?? undefined,
     });
 
-    if (!queryResult.success) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid query parameters", details: queryResult.error.format() },
+        { error: "Invalid query parameters", details: parsed.error.format() },
         { status: 400 }
       );
     }
 
-    const { personaId, status } = queryResult.data;
+    const { personaId, status } = parsed.data;
 
     let query = supabase
       .from("campaigns")
-      .select("*")
+      .select(
+        `
+        *,
+        campaign_posts(count)
+      `
+      )
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
@@ -75,7 +74,21 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(data as Campaign[]);
+    type RowWithCount = DbCampaignRow & {
+      campaign_posts?: { count?: number }[];
+    };
+
+    const campaigns =
+      ((data as RowWithCount[] | null) ?? []).map((row) => {
+        const mapped = mapCampaignRow(row);
+        const count = row.campaign_posts?.[0]?.count ?? 0;
+        return {
+          ...mapped,
+          content_count: count,
+        };
+      });
+
+    return NextResponse.json(campaigns);
   } catch (error) {
     console.error("Unexpected error in GET /api/campaigns:", error);
     return NextResponse.json(
@@ -97,22 +110,21 @@ export async function POST(req: NextRequest) {
     }
 
     const json = await req.json();
-    const parseResult = CampaignCreateSchema.safeParse(json);
+    const parsed = CampaignCreateSchema.safeParse(json);
 
-    if (!parseResult.success) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid request body", details: parseResult.error.format() },
+        { error: "Invalid request body", details: parsed.error.format() },
         { status: 400 }
       );
     }
 
-    const body = parseResult.data;
+    const { personaId, title, description, targetPlatforms } = parsed.data;
 
-    // Verify persona ownership
     const { data: personaRecord, error: personaError } = await supabase
       .from("personas")
       .select("id, user_id")
-      .eq("id", body.persona_id)
+      .eq("id", personaId)
       .single();
 
     if (personaError || !personaRecord) {
@@ -126,25 +138,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const insertPayload = {
-      user_id: user.id,
-      persona_id: body.persona_id,
-      name: body.name,
-      goal: body.goal ?? null,
-      notes: body.notes ?? null,
-      status: body.status ?? "draft",
-      objective: body.objective ?? null,
-      start_date: body.start_date ?? null,
-      end_date: body.end_date ?? null,
-      timezone: body.timezone ?? null,
-      metrics: body.metrics ?? {},
-      budget_cents: body.budget_cents ?? null,
-      budget_currency: body.budget_currency ?? null,
-    };
+    const normalizedPlatforms = Array.from(new Set(targetPlatforms));
+    const metrics = upsertTargetPlatforms({}, normalizedPlatforms);
 
     const { data, error } = await supabase
       .from("campaigns")
-      .insert(insertPayload)
+      .insert({
+        user_id: user.id,
+        persona_id: personaId,
+        name: title,
+        objective: description ?? null,
+        status: "draft",
+        metrics,
+      })
       .select("*")
       .single();
 
@@ -156,7 +162,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(data as Campaign, { status: 201 });
+    return NextResponse.json(mapCampaignRow(data), { status: 201 });
   } catch (error) {
     console.error("Unexpected error in POST /api/campaigns:", error);
     return NextResponse.json(

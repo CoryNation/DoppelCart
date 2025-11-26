@@ -55,53 +55,14 @@ export interface OAuthState {
   expires_at: string;
 }
 
-export interface Campaign {
-  id: string;
-  user_id: string;
-  persona_id: string;
-  name: string;
-  goal: string | null;
-  notes: string | null;
-  status: "draft" | "active" | "paused" | "completed" | "archived" | string;
-  objective: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  timezone: string | null;
-  metrics: Record<string, unknown>;
-  budget_cents: number | null;
-  budget_currency: string | null;
-  archived_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CampaignPostContent {
-  text: string;
-  image_url?: string;
-  prompt_metadata?: Record<string, any>;
-}
-
-export interface CampaignPost {
-  id: string;
-  campaign_id: string;
-  persona_id: string;
-  persona_social_account_id: string;
-  platform_id: SocialPlatformId | string;
-  status: "draft" | "scheduled" | "published" | "failed" | string;
-  scheduled_for: string | null;
-  posted_at: string | null;
-  post_external_id: string | null;
-  content_json: CampaignPostContent;
-  media_assets: Record<string, unknown>[];
-  platform_options: Record<string, unknown>;
-  created_by: "user" | "ai" | string;
-  error_message: string | null;
-  retry_count: number;
-  last_attempt_at: string | null;
-  workflow_state: Record<string, unknown>;
-  created_at: string;
-  updated_at: string;
-}
+export type {
+  Campaign,
+  CampaignContent,
+  CampaignGenerationJob,
+  CampaignWithContent,
+  ContentPayload as CampaignPostContent,
+} from "@/types/campaign";
+export type { CampaignContent as CampaignPost } from "@/types/campaign";
 
 export interface EngagementItem {
   id: string;

@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
-import { Campaign } from "@/types/social";
+import {
+  mapCampaignContentRow,
+  mapCampaignRow,
+  upsertTargetPlatforms,
+} from "@/lib/campaigns/mappers";
 
 const CampaignUpdateSchema = z
   .object({
@@ -17,6 +21,7 @@ const CampaignUpdateSchema = z
     end_date: z.string().datetime().optional().nullable(),
     timezone: z.string().max(120).optional().nullable(),
     metrics: z.record(z.unknown()).optional(),
+    target_platforms: z.array(z.string().min(1)).optional(),
     budget_cents: z.number().int().optional().nullable(),
     budget_currency: z.string().length(3).optional().nullable(),
     archived_at: z.string().datetime().optional().nullable(),
@@ -27,6 +32,20 @@ const CampaignUpdateSchema = z
 
 interface RouteContext {
   params: { id: string };
+}
+
+function mapGenerationJob(row: Record<string, unknown> | null) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    campaign_id: row.campaign_id,
+    input_prompt: row.input_prompt,
+    status: row.status,
+    error_message: row.error_message ?? null,
+    result_json: row.result_json ?? {},
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
 }
 
 export async function GET(_req: NextRequest, context: RouteContext) {
@@ -47,8 +66,8 @@ export async function GET(_req: NextRequest, context: RouteContext) {
       .eq("user_id", user.id)
       .single();
 
-    if (error) {
-      if (error.code === "PGRST116") {
+    if (error || !data) {
+      if (error?.code === "PGRST116") {
         return NextResponse.json({ error: "Not found" }, { status: 404 });
       }
       console.error("Error fetching campaign:", error);
@@ -58,11 +77,26 @@ export async function GET(_req: NextRequest, context: RouteContext) {
       );
     }
 
-    if (!data) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
+    const [{ data: posts }, { data: job }] = await Promise.all([
+      supabase
+        .from("campaign_posts")
+        .select("*")
+        .eq("campaign_id", data.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("campaign_generation_jobs")
+        .select("*")
+        .eq("campaign_id", data.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
 
-    return NextResponse.json(data as Campaign);
+    return NextResponse.json({
+      ...mapCampaignRow(data),
+      content_items: (posts ?? []).map(mapCampaignContentRow),
+      latest_generation_job: mapGenerationJob(job),
+    });
   } catch (error) {
     console.error("Unexpected error in GET /api/campaigns/[id]:", error);
     return NextResponse.json(
@@ -84,16 +118,16 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     }
 
     const json = await req.json();
-    const parseResult = CampaignUpdateSchema.safeParse(json);
+    const parsed = CampaignUpdateSchema.safeParse(json);
 
-    if (!parseResult.success) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid request body", details: parseResult.error.format() },
+        { error: "Invalid request body", details: parsed.error.format() },
         { status: 400 }
       );
     }
 
-    const updates = parseResult.data;
+    const updates = parsed.data;
 
     if (updates.persona_id) {
       const { data: personaRecord, error: personaError } = await supabase
@@ -114,18 +148,27 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       }
     }
 
+    const normalizedMetrics =
+      updates.target_platforms !== undefined
+        ? upsertTargetPlatforms(
+            updates.metrics ?? {},
+            Array.from(new Set(updates.target_platforms))
+          )
+        : updates.metrics;
+
     const mappedUpdates = {
       ...updates,
+      metrics: normalizedMetrics ?? undefined,
       goal: updates.goal ?? undefined,
       notes: updates.notes ?? undefined,
       objective: updates.objective ?? undefined,
       start_date: updates.start_date ?? undefined,
       end_date: updates.end_date ?? undefined,
       timezone: updates.timezone ?? undefined,
-      metrics: updates.metrics ?? undefined,
       budget_cents: updates.budget_cents ?? undefined,
       budget_currency: updates.budget_currency ?? undefined,
       archived_at: updates.archived_at ?? undefined,
+      target_platforms: undefined,
     };
 
     const { data, error } = await supabase
@@ -136,7 +179,10 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       .select("*")
       .single();
 
-    if (error) {
+    if (error || !data) {
+      if (error?.code === "PGRST116") {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
       console.error("Error updating campaign:", error);
       return NextResponse.json(
         { error: "Failed to update campaign" },
@@ -144,11 +190,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       );
     }
 
-    if (!data) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(data as Campaign);
+    return NextResponse.json(mapCampaignRow(data));
   } catch (error) {
     console.error("Unexpected error in PATCH /api/campaigns/[id]:", error);
     return NextResponse.json(
