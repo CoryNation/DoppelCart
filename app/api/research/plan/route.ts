@@ -86,8 +86,8 @@ export async function POST(req: NextRequest) {
     try {
       const parsed = JSON.parse(response);
       return NextResponse.json(parsed);
-    } catch (err) {
-      console.error("Failed to parse research plan:", response);
+    } catch {
+      console.error("Failed to parse research plan");
       return NextResponse.json(
         { error: "Failed to generate research plan" },
         { status: 500 }

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
 
 export async function GET() {
@@ -29,6 +29,40 @@ export async function GET() {
     return NextResponse.json(data || []);
   } catch (error) {
     console.error("Unexpected error in GET /api/personas:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const payload = await req.json();
+    const persona = payload?.persona ?? payload;
+
+    console.info(
+      "[personas] Received persona draft for user",
+      user.id,
+      JSON.stringify(persona).slice(0, 300)
+    );
+
+    return NextResponse.json({
+      persona,
+      status: "accepted",
+      message: "Persona stub received. Persistence coming soon.",
+    });
+  } catch (error) {
+    console.error("Unexpected error in POST /api/personas:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

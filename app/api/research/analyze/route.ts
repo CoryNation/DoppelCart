@@ -92,8 +92,8 @@ export async function POST(req: NextRequest) {
     try {
       const parsed = JSON.parse(response);
       return NextResponse.json(parsed);
-    } catch (err) {
-      console.error("Failed to parse batch analysis response:", response);
+    } catch {
+      console.error("Failed to parse batch analysis response");
       return NextResponse.json(
         { error: "Failed to analyze snippets" },
         { status: 500 }

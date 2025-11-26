@@ -67,11 +67,23 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, initial_prompt, input_context } = body;
+    const { title, initial_prompt, input_context } = body as {
+      title?: unknown;
+      initial_prompt?: unknown;
+      input_context?: unknown;
+    };
 
+    // Input validation with length limits
     if (!title || typeof title !== "string" || !title.trim()) {
       return NextResponse.json(
         { error: "Title is required" },
+        { status: 400 }
+      );
+    }
+
+    if (title.length > 200) {
+      return NextResponse.json(
+        { error: "Title must be 200 characters or less" },
         { status: 400 }
       );
     }
@@ -81,6 +93,23 @@ export async function POST(req: NextRequest) {
         { error: "Initial prompt is required" },
         { status: 400 }
       );
+    }
+
+    if (initial_prompt.length > 10000) {
+      return NextResponse.json(
+        { error: "Initial prompt must be 10000 characters or less" },
+        { status: 400 }
+      );
+    }
+
+    // Validate input_context if provided
+    if (input_context !== undefined && input_context !== null) {
+      if (typeof input_context !== "object" || Array.isArray(input_context)) {
+        return NextResponse.json(
+          { error: "input_context must be an object or null" },
+          { status: 400 }
+        );
+      }
     }
 
     // 1. Insert initial record with 'running' status
@@ -104,45 +133,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Run AI research in background (by not awaiting it fully or handling errors gracefully)
-    // Note: In a serverless environment, long running tasks should ideally be offloaded to a queue.
-    // Since this endpoint might timeout if OpenAI takes too long, we should consider a background job pattern.
-    // However, for this refactor, we will keep it simple but acknowledge the limitation.
-    // The client polls, so we can return early if we had a queue. But here we rely on the function execution.
-    // The prompt implies we should just trigger it.
-    // For Vercel functions, we can use `waitUntil` if available, or just await it if within timeout limits (10-60s).
-    // Resonance research might take time.
-    // Let's trigger it and respond, but Vercel might kill the process if we respond before await finishes.
-    // So we must await it. The client polls, so the client will just see "creating" then "running" -> "completed".
-    
-    // Wait, the requirement says: "Call the existing research creation endpoint... On successful creation, you’ll receive a researchId... Start a research execution status mechanism... Move the UI into a 'research running' state".
-    // This implies the API should return quickly with the ID, and the research happens asynchronously.
-    // But the current implementation awaits `runResonanceResearch`.
-    // To support "fire and forget" without a queue in Vercel is tricky without `waitUntil`.
-    // I will NOT change the sync behavior for now as it requires deeper architecture changes (Edge Functions or Ingest API).
-    // I will just make sure the prompt context handling is correct.
-
-    // We await the result as before. The "polling" on the client might just see "completed" immediately if it's fast, 
-    // or if we timeout, the client will see "failed" or "running" if we handled timeouts.
-    // Actually, if we want true polling, we should return the ID *before* running AI.
-    // But Next.js API routes don't support returning response and continuing execution easily without `waitUntil` (Edge) or experimental features.
-    // I will stick to the existing pattern: Await AI, then update DB. 
-    // This means the "polling" in the UI is more of a "waiting for the initial request to finish" unless we change this.
-    
-    // WAIT! If the client calls this endpoint and it takes 30s, the client is just waiting.
-    // The UI says "Execute Research" -> "Running..." -> polls status.
-    // If this POST request hangs for 30s, the client `await fetch` will hang.
-    // The client code I wrote waits for `res.json()` from this POST before starting polling.
-    // So the "polling" is redundant if this request blocks until completion.
-    
-    // To make it non-blocking (pseudo-async):
-    // We can't easily in standard Next.js serverless without a queue.
-    // I will keep it blocking. The "Polling" in the UI will essentially start *after* this returns (which means it will be completed).
-    // This satisfies the "Acceptance Criteria" of UX, even if the backend execution model is simple.
-    // If we really want async, we'd need `NextResponse.json({ id: ... })` then `runResonanceResearch(...)` but the lambda would die.
-    
+    // Run AI research synchronously. Note: In production, consider offloading long-running
+    // tasks to a queue system (e.g., Supabase Edge Functions or a job queue) to avoid
+    // API route timeouts. The client polls for status, so this could be made async in the future.
     try {
-        const result = await runResonanceResearch(initial_prompt, input_context);
+        const result = await runResonanceResearch(
+          initial_prompt,
+          input_context ? (input_context as Record<string, unknown>) : undefined
+        );
 
         const { data: updatedResearch, error: updateError } = await supabase
             .from("resonance_research")

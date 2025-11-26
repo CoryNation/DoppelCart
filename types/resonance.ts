@@ -44,7 +44,7 @@ export interface ResonanceResearch {
   user_id: string;
   title: string;
   initial_prompt: string;
-  input_context: any | null;
+  input_context: Record<string, unknown> | null;
   result: ResonanceResearchResult | null;
   status: "running" | "completed" | "failed";
   error_message: string | null;

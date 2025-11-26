@@ -37,7 +37,7 @@ export interface PersonaState {
   demographics: PersonaDemographics;
   personality: PersonaPersonality;
   biography: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export type PersonaStage = 
@@ -51,6 +51,37 @@ export type PersonaStage =
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
   content: string;
+}
+
+export interface ResearchPersona {
+  name: string;
+  label: string;
+  summary: string;
+  demographics: {
+    roleOrProfession: string;
+    experienceLevel: string;
+    organizationContext: string;
+    geography: string;
+    other: string;
+  };
+  goals: string[];
+  painPoints: string[];
+  motivators: string[];
+  objections: string[];
+  preferredChannels: string[];
+  contentPreferences: {
+    formats: string[];
+    tones: string[];
+    anglesThatResonate: string[];
+    anglesToAvoid: string[];
+  };
+  languageAndVoice: {
+    samplePhrases: string[];
+    doSay: string[];
+    dontSay: string[];
+  };
+  exampleHooks: string[];
+  callToActionStyles: string[];
 }
 
 

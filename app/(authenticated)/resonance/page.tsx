@@ -16,7 +16,7 @@ import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
 import type { BadgeProps } from "@/components/ui/badge";
 import { ResonanceResearchListItem } from "@/types/resonance";
-import NewResearchModal from "@/components/resonance/NewResearchModal";
+import NewResearchModal from "@/components/research/NewResearchModal";
 
 export default function ResonancePage() {
   const [researchList, setResearchList] = useState<ResonanceResearchListItem[]>([]);
@@ -211,9 +211,8 @@ export default function ResonancePage() {
       )}
 
       <NewResearchModal 
-        isOpen={isCreateModalOpen} 
-        onClose={() => setIsCreateModalOpen(false)} 
-        onSuccess={() => {
+        open={isCreateModalOpen} 
+        onClose={() => {
           setIsCreateModalOpen(false);
           fetchResearch();
         }}
