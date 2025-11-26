@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
 
 interface RouteContext {
-  params: { contentId: string };
+  params: Promise<{ contentId: string }>;
 }
 
 export async function DELETE(_req: Request, context: RouteContext) {
   const supabase = await createSupabaseServerClient();
+  const { contentId } = await context.params;
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -27,7 +28,7 @@ export async function DELETE(_req: Request, context: RouteContext) {
       campaigns!inner ( user_id )
     `
     )
-    .eq("id", context.params.contentId)
+    .eq("id", contentId)
     .eq("campaigns.user_id", user.id)
     .single();
 

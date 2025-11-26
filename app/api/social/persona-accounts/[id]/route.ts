@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function DELETE(_req: NextRequest, context: RouteContext) {
   try {
+    const { id: accountId } = await context.params;
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
@@ -15,8 +16,6 @@ export async function DELETE(_req: NextRequest, context: RouteContext) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const accountId = context.params.id;
 
     const { data: account, error: accountError } = await supabase
       .from("persona_social_accounts")

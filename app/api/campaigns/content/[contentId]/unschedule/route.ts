@@ -3,11 +3,12 @@ import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
 import { mapCampaignContentRow } from "@/lib/campaigns/mappers";
 
 interface RouteContext {
-  params: { contentId: string };
+  params: Promise<{ contentId: string }>;
 }
 
 export async function POST(_req: Request, context: RouteContext) {
   const supabase = await createSupabaseServerClient();
+  const { contentId } = await context.params;
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -27,7 +28,7 @@ export async function POST(_req: Request, context: RouteContext) {
       campaigns!inner ( user_id )
     `
     )
-    .eq("id", context.params.contentId)
+    .eq("id", contentId)
     .eq("campaigns.user_id", user.id)
     .single();
 
@@ -50,7 +51,7 @@ export async function POST(_req: Request, context: RouteContext) {
       persona_social_account_id: null,
       error_message: null,
     })
-    .eq("id", context.params.contentId)
+    .eq("id", contentId)
     .select("*")
     .single();
 

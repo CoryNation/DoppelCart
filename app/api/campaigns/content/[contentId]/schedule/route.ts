@@ -10,11 +10,12 @@ const ScheduleSchema = z.object({
 });
 
 interface RouteContext {
-  params: { contentId: string };
+  params: Promise<{ contentId: string }>;
 }
 
 export async function POST(req: NextRequest, context: RouteContext) {
   const supabase = await createSupabaseServerClient();
+  const { contentId } = await context.params;
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -33,7 +34,6 @@ export async function POST(req: NextRequest, context: RouteContext) {
     );
   }
 
-  const { contentId } = context.params;
   const { scheduledFor, personaSocialAccountId, platformId } = parsed.data;
 
   const {

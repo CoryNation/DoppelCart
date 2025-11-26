@@ -17,7 +17,7 @@ const CampaignPostContentSchema = z
     image_prompt: z.string().optional().nullable(),
     image_url: z.string().url().optional().nullable(),
     recommended_platforms: z.array(z.string()).optional(),
-    prompt_metadata: z.record(z.unknown()).optional(),
+    prompt_metadata: z.record(z.string(), z.unknown()).optional(),
   })
   .passthrough();
 
@@ -31,7 +31,7 @@ const CampaignPostCreateSchema = z.object({
   posted_at: z.string().datetime().optional().nullable(),
   content_json: CampaignPostContentSchema,
   media_assets: z.array(z.unknown()).optional(),
-  platform_options: z.record(z.unknown()).optional(),
+  platform_options: z.record(z.string(), z.unknown()).optional(),
   created_by: z.enum(["user", "ai"]).optional(),
 });
 
@@ -43,11 +43,11 @@ const CampaignPostUpdateSchema = z
     posted_at: z.string().datetime().optional().nullable(),
     content_json: CampaignPostContentSchema.optional(),
     media_assets: z.array(z.unknown()).optional(),
-    platform_options: z.record(z.unknown()).optional(),
+    platform_options: z.record(z.string(), z.unknown()).optional(),
     error_message: z.string().optional().nullable(),
     retry_count: z.number().int().optional(),
     last_attempt_at: z.string().datetime().optional().nullable(),
-    workflow_state: z.record(z.unknown()).optional(),
+    workflow_state: z.record(z.string(), z.unknown()).optional(),
   })
   .refine((value) => {
     const keys = Object.keys(value).filter((key) => key !== "id");
@@ -128,7 +128,8 @@ export async function GET(req: NextRequest) {
 
     const posts =
       ((data as CampaignPostRow[] | null) ?? []).map((row) => {
-        const { campaigns: _campaigns, ...post } = row;
+        const { campaigns, ...post } = row;
+        void campaigns;
         return post as CampaignPost;
       });
 

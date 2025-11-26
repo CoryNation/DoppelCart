@@ -6,15 +6,16 @@ import { generateCampaignContent } from "@/lib/openaiCampaign";
 
 const GenerationSchema = z.object({
   prompt: z.string().max(4000).optional(),
-  researchContext: z.record(z.unknown()).optional(),
+  researchContext: z.record(z.string(), z.unknown()).optional(),
 });
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function POST(req: NextRequest, context: RouteContext) {
   const supabase = await createSupabaseServerClient();
+  const { id: campaignId } = await context.params;
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -32,8 +33,6 @@ export async function POST(req: NextRequest, context: RouteContext) {
       { status: 400 }
     );
   }
-
-  const campaignId = context.params.id;
 
   const { data: campaignRow, error: campaignError } = await supabase
     .from("campaigns")

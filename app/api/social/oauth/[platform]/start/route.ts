@@ -15,12 +15,13 @@ const StartRequestSchema = z.object({
 });
 
 interface RouteContext {
-  params: { platform: string };
+  params: Promise<{ platform: string }>;
 }
 
 export async function POST(req: NextRequest, context: RouteContext) {
   try {
-    const platformId = context.params.platform?.toLowerCase();
+    const { platform } = await context.params;
+    const platformId = platform?.toLowerCase();
 
     if (!platformId) {
       return NextResponse.json({ error: "Missing platform" }, { status: 400 });

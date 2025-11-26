@@ -180,7 +180,7 @@ export default function CampaignDetailClient({
       case "published":
         return "default";
       case "failed":
-        return "destructive";
+        return "danger";
       default:
         return "outline";
     }

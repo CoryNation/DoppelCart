@@ -71,13 +71,20 @@ export async function GET(req: NextRequest) {
 
     // Clean up the response to remove the joined table data if not part of the type
     // and cast to PersonaSocialAccount[]
-    const accounts: PersonaSocialAccount[] = (data || []).map((item: any) => {
-      const { personas, metadata, ...account } = item;
+    type PersonaAccountRow = PersonaSocialAccount & {
+      personas?: { user_id: string } | null;
+      metadata?: Record<string, unknown> | null;
+    };
+
+    const accounts: PersonaSocialAccount[] = (
+      (data as PersonaAccountRow[] | null) ?? []
+    ).map(({ personas, metadata, ...account }) => {
+      void personas;
       return {
         ...account,
         metadata: metadata ?? {},
       };
-    }) as PersonaSocialAccount[];
+    });
 
     return NextResponse.json(accounts);
   } catch (error) {

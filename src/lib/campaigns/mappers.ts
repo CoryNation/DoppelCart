@@ -31,6 +31,7 @@ type DbCampaignContentRow = {
   scheduled_for?: string | null;
   posted_at?: string | null;
   post_external_id?: string | null;
+  post_url?: string | null;
   content_json?: CampaignContent["content_json"];
   media_assets?: Record<string, unknown>[] | null;
   platform_options?: Record<string, unknown> | null;
@@ -38,6 +39,7 @@ type DbCampaignContentRow = {
   error_message?: string | null;
   retry_count?: number | null;
   last_attempt_at?: string | null;
+  last_error?: string | null;
   workflow_state?: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
@@ -87,6 +89,7 @@ export function mapCampaignContentRow(
     scheduled_for: row.scheduled_for ?? null,
     posted_at: row.posted_at ?? null,
     post_external_id: row.post_external_id ?? null,
+    post_url: row.post_url ?? null,
     content_json: content,
     media_assets: Array.isArray(row.media_assets) ? row.media_assets : [],
     platform_options: (row.platform_options as Record<string, unknown>) ?? {},
@@ -94,6 +97,7 @@ export function mapCampaignContentRow(
     error_message: row.error_message ?? null,
     retry_count: row.retry_count ?? 0,
     last_attempt_at: row.last_attempt_at ?? null,
+    last_error: row.last_error ?? null,
     workflow_state: (row.workflow_state as Record<string, unknown>) ?? {},
     created_at: row.created_at,
     updated_at: row.updated_at,

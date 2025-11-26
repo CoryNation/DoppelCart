@@ -23,14 +23,16 @@ interface CampaignPost {
   id: string;
   campaign_id: string;
   persona_id: string;
-  persona_social_account_id: string;
+  persona_social_account_id: string | null;
   platform_id: string;
   status: string;
   scheduled_for: string | null;
   posted_at: string | null;
-  content_json: { text: string };
+  post_url: string | null;
+  content_json: { title?: string; text: string };
   created_at: string;
   error_message: string | null;
+  last_error: string | null;
 }
 
 interface PersonaSocialAccountOption {
@@ -70,6 +72,8 @@ export function CampaignPostsPanel({
     scheduled_for: "",
     content_text: "",
   });
+  const [postingPostId, setPostingPostId] = useState<string | null>(null);
+  const [postingError, setPostingError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadPosts() {
@@ -328,21 +332,75 @@ export function CampaignPostsPanel({
     }
   };
 
+  const handlePostNow = async (postId: string) => {
+    setPostingPostId(postId);
+    setPostingError(null);
+    setFormError(null);
+
+    try {
+      const response = await fetch(
+        `/api/campaigns/content/${postId}/post-now`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(
+          payload?.error || "Failed to post to Reddit"
+        );
+      }
+
+      const updatedPost = (await response.json()) as CampaignPost;
+      setPosts((prev) =>
+        prev.map((post) => (post.id === updatedPost.id ? updatedPost : post))
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Unexpected error posting to Reddit";
+      setPostingError(errorMessage);
+      setFormError(errorMessage);
+    } finally {
+      setPostingPostId(null);
+    }
+  };
+
   const renderStatusActions = (post: CampaignPost) => {
+    const isReddit = post.platform_id === "reddit";
+    const canPostNow = isReddit && (post.status === "draft" || post.status === "scheduled");
+    const isPosting = postingPostId === post.id;
+
     if (post.status === "draft") {
       return (
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {canPostNow && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => handlePostNow(post.id)}
+              disabled={isPosting}
+            >
+              {isPosting ? "Posting..." : "Post to Reddit now"}
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
             onClick={() => updatePostStatus(post.id, "scheduled")}
+            disabled={isPosting}
           >
             Mark Scheduled
           </Button>
           <Button
-            variant="default"
+            variant="outline"
             size="sm"
             onClick={() => updatePostStatus(post.id, "published")}
+            disabled={isPosting}
           >
             Mark Published
           </Button>
@@ -352,18 +410,30 @@ export function CampaignPostsPanel({
 
     if (post.status === "scheduled") {
       return (
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {canPostNow && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => handlePostNow(post.id)}
+              disabled={isPosting}
+            >
+              {isPosting ? "Posting..." : "Post to Reddit now"}
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
             onClick={() => updatePostStatus(post.id, "draft")}
+            disabled={isPosting}
           >
             Back to Draft
           </Button>
           <Button
-            variant="default"
+            variant="outline"
             size="sm"
             onClick={() => updatePostStatus(post.id, "published")}
+            disabled={isPosting}
           >
             Mark Published
           </Button>
@@ -373,13 +443,27 @@ export function CampaignPostsPanel({
 
     if (post.status === "published") {
       return (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => updatePostStatus(post.id, "draft")}
-        >
-          Revert to Draft
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          {post.post_url && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(post.post_url!, "_blank")}
+              asChild
+            >
+              <a href={post.post_url} target="_blank" rel="noopener noreferrer">
+                View on Reddit
+              </a>
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => updatePostStatus(post.id, "draft")}
+          >
+            Revert to Draft
+          </Button>
+        </div>
       );
     }
 
@@ -388,6 +472,11 @@ export function CampaignPostsPanel({
 
   return (
     <div className="space-y-6">
+      {error && (
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardContent className="p-4 text-sm text-destructive">{error}</CardContent>
+        </Card>
+      )}
       <Card>
         <CardHeader>
           <CardTitle>Create Campaign Post</CardTitle>
@@ -526,9 +615,14 @@ export function CampaignPostsPanel({
                       </span>
                     )}
                   </div>
-                  {post.error_message && (
+                  {(post.error_message || post.last_error) && (
                     <p className="text-xs text-destructive">
-                      Error: {post.error_message}
+                      Error: {post.last_error || post.error_message}
+                    </p>
+                  )}
+                  {postingPostId === post.id && postingError && (
+                    <p className="text-xs text-destructive">
+                      Posting error: {postingError}
                     </p>
                   )}
                   <div className="flex flex-wrap gap-2 justify-between items-center pt-2 border-t">

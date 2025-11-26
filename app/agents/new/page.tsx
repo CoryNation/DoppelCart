@@ -37,12 +37,13 @@ async function getResonanceContext(id: string): Promise<ResonanceContext | null>
 export default async function NewAgentPage({
   searchParams,
 }: {
-  searchParams: { fromResearchId?: string };
+  searchParams: Promise<{ fromResearchId?: string }>;
 }) {
+  const { fromResearchId } = await searchParams;
   let resonanceContext: ResonanceContext | null = null;
   
-  if (searchParams.fromResearchId) {
-    resonanceContext = await getResonanceContext(searchParams.fromResearchId);
+  if (fromResearchId) {
+    resonanceContext = await getResonanceContext(fromResearchId);
   }
 
   return (

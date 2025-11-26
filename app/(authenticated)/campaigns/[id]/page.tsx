@@ -12,12 +12,13 @@ import type {
 import CampaignDetailClient from "./CampaignDetailClient";
 
 interface CampaignDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function CampaignDetailPage({
   params,
 }: CampaignDetailPageProps) {
+  const { id } = await params;
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -30,7 +31,7 @@ export default async function CampaignDetailPage({
   const { data: campaignRow, error: campaignError } = await supabase
     .from("campaigns")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .eq("user_id", user.id)
     .single();
 
@@ -47,7 +48,7 @@ export default async function CampaignDetailPage({
     supabase
       .from("campaign_posts")
       .select("*")
-      .eq("campaign_id", campaignRow.id)
+    .eq("campaign_id", campaignRow.id)
       .order("created_at", { ascending: false }),
     supabase
       .from("campaign_generation_jobs")

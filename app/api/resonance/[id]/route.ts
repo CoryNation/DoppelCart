@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
 
+type RouteHandlerContext = { params: Promise<{ id: string }> };
+
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteHandlerContext
 ) {
   try {
+    const { id } = await context.params;
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
@@ -29,7 +32,7 @@ export async function GET(
           )
         )
       `)
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id)
       .single();
 
@@ -59,9 +62,10 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteHandlerContext
 ) {
   try {
+    const { id } = await context.params;
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
@@ -84,7 +88,7 @@ export async function PUT(
     const { data, error } = await supabase
       .from("resonance_research")
       .update(updates)
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id)
       .select()
       .single();
@@ -115,9 +119,10 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteHandlerContext
 ) {
   try {
+    const { id } = await context.params;
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
@@ -130,7 +135,7 @@ export async function DELETE(
     const { error } = await supabase
       .from("resonance_research")
       .delete()
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id);
 
     if (error) {

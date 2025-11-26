@@ -26,10 +26,7 @@ export function ThemeProvider({
   disableTransitionOnChange?: boolean;
 }) {
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
-    setMounted(true);
     // Check for saved theme preference or default to system preference
     const savedTheme = localStorage.getItem("theme") as Theme | null;
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")

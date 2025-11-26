@@ -4,9 +4,10 @@ import { runResonanceResearch } from "@/lib/openai";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
@@ -20,7 +21,7 @@ export async function POST(
     const { data: existingResearch, error: fetchError } = await supabase
       .from("resonance_research")
       .select("*")
-      .eq("id", params.id)
+      .eq("id", id)
       .eq("user_id", user.id)
       .single();
 
@@ -46,7 +47,7 @@ export async function POST(
         error_message: null,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", params.id);
+      .eq("id", id);
 
     if (updateStartError) {
       console.error("Error setting resonance research to running:", updateStartError);
@@ -73,7 +74,7 @@ export async function POST(
           last_run_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
-        .eq("id", params.id)
+        .eq("id", id)
         .select()
         .single();
 
@@ -98,7 +99,7 @@ export async function POST(
           last_run_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
-        .eq("id", params.id);
+        .eq("id", id);
 
       if (failUpdateError) {
         console.error("Error updating resonance research failure status:", failUpdateError);

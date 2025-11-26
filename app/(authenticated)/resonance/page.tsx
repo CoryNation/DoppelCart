@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { Plus, RotateCw, Trash2, ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 import Card, {
   CardContent,
@@ -15,6 +14,7 @@ import Card, {
 } from "@/components/ui/card";
 import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
+import type { BadgeProps } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 // import {
@@ -43,8 +43,6 @@ export default function ResonancePage() {
   const [title, setTitle] = useState("");
   const [prompt, setPrompt] = useState("");
   const [isCreating, setIsCreating] = useState(false);
-
-  const router = useRouter();
 
   useEffect(() => {
     fetchResearch();
@@ -138,14 +136,16 @@ export default function ResonancePage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (
+    status: ResonanceResearchListItem["status"]
+  ): BadgeProps["variant"] => {
     switch (status) {
       case "completed":
         return "success";
       case "running":
-        return "warning"; // or secondary/default
+        return "warning";
       case "failed":
-        return "destructive";
+        return "danger";
       default:
         return "secondary";
     }
@@ -202,7 +202,7 @@ export default function ResonancePage() {
             <Card key={item.id} className="flex flex-col">
               <CardHeader>
                 <div className="flex justify-between items-start gap-2">
-                  <Badge variant={getStatusColor(item.status) as any}>
+                  <Badge variant={getStatusVariant(item.status)}>
                     {item.status}
                   </Badge>
                   {item.last_run_at && (

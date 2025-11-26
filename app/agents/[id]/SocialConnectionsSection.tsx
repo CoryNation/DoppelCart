@@ -18,12 +18,6 @@ interface FetchState<T> {
   error: string | null;
 }
 
-const initialState = {
-  data: [] as SocialPlatform[],
-  isLoading: true,
-  error: null as string | null,
-};
-
 export function SocialConnectionsSection({
   personaId,
 }: SocialConnectionsSectionProps) {

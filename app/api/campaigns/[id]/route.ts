@@ -20,7 +20,7 @@ const CampaignUpdateSchema = z
     start_date: z.string().datetime().optional().nullable(),
     end_date: z.string().datetime().optional().nullable(),
     timezone: z.string().max(120).optional().nullable(),
-    metrics: z.record(z.unknown()).optional(),
+    metrics: z.record(z.string(), z.unknown()).optional(),
     target_platforms: z.array(z.string().min(1)).optional(),
     budget_cents: z.number().int().optional().nullable(),
     budget_currency: z.string().length(3).optional().nullable(),
@@ -31,7 +31,7 @@ const CampaignUpdateSchema = z
   });
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 function mapGenerationJob(row: Record<string, unknown> | null) {
@@ -50,6 +50,7 @@ function mapGenerationJob(row: Record<string, unknown> | null) {
 
 export async function GET(_req: NextRequest, context: RouteContext) {
   try {
+    const { id } = await context.params;
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
@@ -62,7 +63,7 @@ export async function GET(_req: NextRequest, context: RouteContext) {
     const { data, error } = await supabase
       .from("campaigns")
       .select("*")
-      .eq("id", context.params.id)
+      .eq("id", id)
       .eq("user_id", user.id)
       .single();
 
@@ -108,6 +109,7 @@ export async function GET(_req: NextRequest, context: RouteContext) {
 
 export async function PATCH(req: NextRequest, context: RouteContext) {
   try {
+    const { id } = await context.params;
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
@@ -174,7 +176,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     const { data, error } = await supabase
       .from("campaigns")
       .update(mappedUpdates)
-      .eq("id", context.params.id)
+      .eq("id", id)
       .eq("user_id", user.id)
       .select("*")
       .single();
@@ -202,6 +204,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
 
 export async function DELETE(_req: NextRequest, context: RouteContext) {
   try {
+    const { id } = await context.params;
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
@@ -214,7 +217,7 @@ export async function DELETE(_req: NextRequest, context: RouteContext) {
     const { error } = await supabase
       .from("campaigns")
       .delete()
-      .eq("id", context.params.id)
+      .eq("id", id)
       .eq("user_id", user.id);
 
     if (error) {

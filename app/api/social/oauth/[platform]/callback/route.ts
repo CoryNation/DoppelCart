@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServiceClient } from "@/lib/supabase/serviceClient";
 
 interface RouteContext {
-  params: { platform: string };
+  params: Promise<{ platform: string }>;
 }
 
 export async function GET(req: NextRequest, context: RouteContext) {
   try {
+    const { platform } = await context.params;
     const { searchParams } = new URL(req.url);
     const state = searchParams.get("state");
     const code = searchParams.get("code");
@@ -75,7 +76,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
       );
     }
 
-    redirectUrl.searchParams.set("platform", context.params.platform);
+    redirectUrl.searchParams.set("platform", platform);
     redirectUrl.searchParams.set("state", state);
 
     if (errorCode || errorDescription) {

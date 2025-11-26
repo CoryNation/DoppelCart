@@ -4,12 +4,13 @@ import { mapCampaignContentRow } from "@/lib/campaigns/mappers";
 import CampaignContentEditor from "./CampaignContentEditor";
 
 interface ContentEditorPageProps {
-  params: { id: string; contentId: string };
+  params: Promise<{ id: string; contentId: string }>;
 }
 
 export default async function CampaignContentEditorPage({
   params,
 }: ContentEditorPageProps) {
+  const { id: campaignId, contentId } = await params;
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -27,8 +28,8 @@ export default async function CampaignContentEditorPage({
       campaigns!inner ( id, user_id, name, persona_id )
     `
     )
-    .eq("id", params.contentId)
-    .eq("campaign_id", params.id)
+    .eq("id", contentId)
+    .eq("campaign_id", campaignId)
     .eq("campaigns.user_id", user.id)
     .single();
 
@@ -40,7 +41,7 @@ export default async function CampaignContentEditorPage({
 
   return (
     <CampaignContentEditor
-      campaignId={params.id}
+      campaignId={campaignId}
       campaignName={postRow.campaigns?.name ?? "Campaign"}
       content={mapped}
       personaId={mapped.persona_id}

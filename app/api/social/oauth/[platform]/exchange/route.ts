@@ -22,12 +22,13 @@ const TokenResponseSchema = z.object({
 });
 
 interface RouteContext {
-  params: { platform: string };
+  params: Promise<{ platform: string }>;
 }
 
 export async function POST(req: NextRequest, context: RouteContext) {
   try {
-    const platformId = context.params.platform?.toLowerCase();
+    const { platform } = await context.params;
+    const platformId = platform?.toLowerCase();
     if (!platformId) {
       return NextResponse.json({ error: "Missing platform" }, { status: 400 });
     }
@@ -245,6 +246,8 @@ export async function POST(req: NextRequest, context: RouteContext) {
       account_handle: upsertedAccount.account_handle,
       profile_url: upsertedAccount.profile_url,
       avatar_url: upsertedAccount.avatar_url,
+      provider_account_id: upsertedAccount.provider_account_id,
+      provider_username: upsertedAccount.provider_username,
       token_type: upsertedAccount.token_type,
       access_token_expires_at: upsertedAccount.access_token_expires_at,
       refresh_token_expires_at: upsertedAccount.refresh_token_expires_at,
@@ -253,6 +256,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
       last_token_refresh_at: upsertedAccount.last_token_refresh_at,
       last_token_error: upsertedAccount.last_token_error,
       metadata: upsertedAccount.metadata,
+      last_refreshed_at: upsertedAccount.last_refreshed_at,
       last_synced_at: upsertedAccount.last_synced_at,
       last_engagement_sync_at: upsertedAccount.last_engagement_sync_at,
       revoked_at: upsertedAccount.revoked_at,

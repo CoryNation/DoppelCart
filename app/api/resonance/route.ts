@@ -31,15 +31,19 @@ export async function GET() {
     }
 
     // Map the result to include persona_count as a number
-    const researchList: ResonanceResearchListItem[] = (data || []).map(
-      (item: Record<string, any>) => {
-        const { resonance_research_personas, ...rest } = item;
-        return {
-          ...rest,
-          persona_count: resonance_research_personas?.[0]?.count ?? 0,
-        };
-      }
-    ) as ResonanceResearchListItem[];
+    type ResonanceResearchRow = ResonanceResearchListItem & {
+      resonance_research_personas?: { count?: number }[];
+    };
+
+    const researchList: ResonanceResearchListItem[] = (
+      (data as ResonanceResearchRow[] | null) ?? []
+    ).map((item) => {
+      const { resonance_research_personas, ...rest } = item;
+      return {
+        ...rest,
+        persona_count: resonance_research_personas?.[0]?.count ?? 0,
+      };
+    });
 
     return NextResponse.json(researchList);
   } catch (error) {

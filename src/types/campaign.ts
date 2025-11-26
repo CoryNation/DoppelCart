@@ -53,6 +53,7 @@ export interface CampaignContent {
   scheduled_for: string | null;
   posted_at: string | null;
   post_external_id: string | null;
+  post_url: string | null;
   content_json: ContentPayload;
   media_assets: Record<string, unknown>[];
   platform_options: Record<string, unknown>;
@@ -60,6 +61,7 @@ export interface CampaignContent {
   error_message: string | null;
   retry_count: number;
   last_attempt_at: string | null;
+  last_error: string | null;
   workflow_state: Record<string, unknown>;
   created_at: string;
   updated_at: string;

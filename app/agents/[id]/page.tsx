@@ -2,12 +2,17 @@ import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import Card, { CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import Card, { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
 import { ResonanceResearchLinker, Study } from "./ResonanceResearchLinker";
 import { SocialConnectionsSection } from "./SocialConnectionsSection";
 
-export default async function AgentDetailPage({ params }: { params: { id: string } }) {
+export default async function AgentDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -22,7 +27,7 @@ export default async function AgentDetailPage({ params }: { params: { id: string
       *,
       agents!inner(status)
     `)
-    .eq("agent_id", params.id) // Assuming params.id is agent_id based on file structure app/agents/[id]
+    .eq("agent_id", id) // Assuming params.id is agent_id based on file structure app/agents/[id]
     .single();
 
   if (error || !persona) {
@@ -73,7 +78,7 @@ export default async function AgentDetailPage({ params }: { params: { id: string
         </div>
         <div className="flex gap-2">
            <Button variant="outline" asChild>
-             <Link href={`/agents/${params.id}/channels`}>Manage Channels</Link>
+             <Link href={`/agents/${id}/channels`}>Manage Channels</Link>
            </Button>
            <Button variant="default">Edit Persona</Button>
         </div>

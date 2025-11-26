@@ -7,7 +7,7 @@ import {
 import { decryptSecret, encryptSecret } from "@/lib/security/encryption";
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 function byteaToBuffer(value: string | null): Buffer | null {
@@ -24,6 +24,7 @@ function byteaToBuffer(value: string | null): Buffer | null {
 
 export async function POST(_req: NextRequest, context: RouteContext) {
   try {
+    const { id: accountId } = await context.params;
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
@@ -32,8 +33,6 @@ export async function POST(_req: NextRequest, context: RouteContext) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const accountId = context.params.id;
 
     const { data: account, error: accountError } = await supabase
       .from("persona_social_accounts")
