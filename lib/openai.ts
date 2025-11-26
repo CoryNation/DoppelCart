@@ -1,14 +1,24 @@
 import OpenAI from "openai";
 import { ResonanceResearchResult } from "@/types/resonance";
 
-const apiKey = process.env.OPENAI_API_KEY;
-if (!apiKey) {
-  throw new Error("OPENAI_API_KEY is missing from environment variables.");
-}
+/**
+ * Lazy-loaded OpenAI client.
+ * Only created when actually needed (at runtime), not during build.
+ */
+let openaiClient: OpenAI | null = null;
 
-export const openai = new OpenAI({
-  apiKey,
-});
+function getOpenAIClient(): OpenAI {
+  if (!openaiClient) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error("OPENAI_API_KEY is missing from environment variables.");
+    }
+    openaiClient = new OpenAI({
+      apiKey,
+    });
+  }
+  return openaiClient;
+}
 
 export function getClarifyModel(): string {
   return process.env.RESEARCH_CLARIFY_MODEL || "gpt-4o-mini";
@@ -24,6 +34,7 @@ export async function callChatModel(options: {
   const temperature = options.temperature ?? 0.7;
 
   try {
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model,
       temperature,
