@@ -15,34 +15,13 @@ import Card, {
 import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
 import type { BadgeProps } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogDescription,
-//   DialogFooter,
-//   DialogHeader,
-//   DialogTitle,
-//   DialogTrigger,
-// } from "@/components/ui/dialog"; // Assuming standard shadcn/ui dialog structure
 import { ResonanceResearchListItem } from "@/types/resonance";
-
-// Mocking Dialog if not present or exporting differently in this project
-// If Dialog isn't in ui/index.ts, we might need a basic modal or custom implementation.
-// However, the prompt mentions `modal.tsx` in `components/ui`. Let's check `modal.tsx`.
-// For now, I'll use a standard Modal component wrapper if available or build a simple one inline.
-// Wait, checking file list: `modal.tsx` exists. I'll read it first to be sure.
+import NewResearchModal from "@/components/resonance/NewResearchModal";
 
 export default function ResonancePage() {
   const [researchList, setResearchList] = useState<ResonanceResearchListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  
-  // Create form state
-  const [title, setTitle] = useState("");
-  const [prompt, setPrompt] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     fetchResearch();
@@ -59,36 +38,6 @@ export default function ResonancePage() {
       console.error("Failed to fetch research:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !prompt.trim()) return;
-
-    setIsCreating(true);
-    try {
-      const res = await fetch("/api/resonance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          initial_prompt: prompt,
-        }),
-      });
-
-      if (res.ok) {
-        setIsCreateModalOpen(false);
-        setTitle("");
-        setPrompt("");
-        fetchResearch();
-      } else {
-        console.error("Failed to create research");
-      }
-    } catch (error) {
-      console.error("Error creating research:", error);
-    } finally {
-      setIsCreating(false);
     }
   };
 
@@ -261,54 +210,14 @@ export default function ResonancePage() {
         </div>
       )}
 
-      {/* Simple Modal for Creation */}
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <div className="w-full max-w-lg p-6 bg-card border rounded-lg shadow-lg animate-in fade-in zoom-in-95 duration-200">
-            <h2 className="text-xl font-semibold mb-4">New Resonance Research</h2>
-            <form onSubmit={handleCreate}>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Project Title</Label>
-                  <Input
-                    id="title"
-                    placeholder="e.g. Sustainable Fashion Blog"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="prompt">
-                    Describe your business & goals
-                  </Label>
-                  <textarea
-                    id="prompt"
-                    className="flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                    placeholder="We sell eco-friendly sneakers to Gen Z. We want to be funny but educational..."
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsCreateModalOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isCreating}>
-                  {isCreating ? "Starting Analysis..." : "Start Research"}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <NewResearchModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+        onSuccess={() => {
+          setIsCreateModalOpen(false);
+          fetchResearch();
+        }}
+      />
     </div>
   );
 }
-
