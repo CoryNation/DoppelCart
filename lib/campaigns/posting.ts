@@ -171,15 +171,14 @@ export async function postCampaignContentToReddit(
       )
     `
     )
-    .eq("id", contentId)
-    .single();
+    .eq("id", contentId);
 
-  // If userId provided, verify ownership
+  // If userId provided, verify ownership through the join
   if (userId) {
     query = query.eq("campaigns.user_id", userId);
   }
 
-  const { data: postRow, error: postError } = await query;
+  const { data: postRow, error: postError } = await query.single();
 
   if (postError || !postRow) {
     throw new Error("Campaign post not found or access denied");
