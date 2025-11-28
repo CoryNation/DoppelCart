@@ -29,6 +29,12 @@ create index if not exists research_tasks_created_at_idx on public.research_task
 alter table public.research_tasks enable row level security;
 
 -- Policies for research_tasks
+-- Drop policies if they exist (for idempotent migrations)
+drop policy if exists "Users can view their own research tasks" on public.research_tasks;
+drop policy if exists "Users can insert their own research tasks" on public.research_tasks;
+drop policy if exists "Users can update their own research tasks" on public.research_tasks;
+drop policy if exists "Users can delete their own research tasks" on public.research_tasks;
+
 create policy "Users can view their own research tasks"
   on public.research_tasks for select
   using (auth.uid() = user_id);
@@ -46,11 +52,10 @@ create policy "Users can delete their own research tasks"
   using (auth.uid() = user_id);
 
 -- Trigger to update updated_at timestamp
+drop trigger if exists set_research_tasks_updated_at on public.research_tasks;
+
 create trigger set_research_tasks_updated_at
   before update on public.research_tasks
   for each row
   execute function public.handle_updated_at();
-
-
-
 
