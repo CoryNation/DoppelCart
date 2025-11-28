@@ -1,5 +1,4 @@
 import { callChatModel } from "@/lib/openai";
-import { PersonaState } from "@/types/persona";
 
 export interface PersonaFromCorpusInput {
   userDescription?: string; // what the user says they want this persona to achieve

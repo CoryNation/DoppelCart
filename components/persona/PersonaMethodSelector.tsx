@@ -42,7 +42,7 @@ export default function PersonaMethodSelector({ onSelectMethod }: PersonaMethodS
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold">Create Your Persona</h1>
           <p className="text-muted-foreground">
-            Choose how you'd like to create your AI influencer persona
+            Choose how you&apos;d like to create your AI influencer persona
           </p>
         </div>
 

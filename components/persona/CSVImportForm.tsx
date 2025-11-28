@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Card, { CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import Card from '@/components/ui/card';
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,7 +12,7 @@ interface CSVImportFormProps {
   onSuccess: () => void;
 }
 
-export default function CSVImportForm({ onBack, onSuccess }: CSVImportFormProps) {
+export default function CSVImportForm({ onBack, onSuccess: _onSuccess }: CSVImportFormProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [platformHint, setPlatformHint] = useState('');
@@ -158,7 +158,7 @@ export default function CSVImportForm({ onBack, onSuccess }: CSVImportFormProps)
                 required
               />
               <p className="text-xs text-muted-foreground mt-1">
-                The system will automatically extract text from columns like "text", "content", "post", "comment", "body", or "title"
+                The system will automatically extract text from columns like &quot;text&quot;, &quot;content&quot;, &quot;post&quot;, &quot;comment&quot;, &quot;body&quot;, or &quot;title&quot;
               </p>
             </div>
 

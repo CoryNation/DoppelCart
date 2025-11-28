@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Card, { CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import Card from '@/components/ui/card';
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,7 +12,7 @@ interface AIHistoryImportFormProps {
   onSuccess: () => void;
 }
 
-export default function AIHistoryImportForm({ onBack, onSuccess }: AIHistoryImportFormProps) {
+export default function AIHistoryImportForm({ onBack, onSuccess: _onSuccess }: AIHistoryImportFormProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [aiHistoryText, setAiHistoryText] = useState('');
