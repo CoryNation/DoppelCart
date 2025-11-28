@@ -13,7 +13,7 @@ export default function PersonasPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-h2">Personas</h1>
         <Button asChild>
-          <Link href="/agents/new">Create Persona</Link>
+          <Link href="/personas/new">Create Persona</Link>
         </Button>
       </div>
       <Card variant="elevated" padding="lg">

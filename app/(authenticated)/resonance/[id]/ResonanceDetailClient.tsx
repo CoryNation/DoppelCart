@@ -339,7 +339,7 @@ export default function ResonanceDetailClient({
             </CardContent>
             <CardFooter>
               <Button className="w-full" variant="secondary" asChild>
-                <a href={`/agents/new?fromResearchId=${research.id}`}>
+                <a href={`/personas/new?fromResearchId=${research.id}`}>
                   <UserPlus className="mr-2 h-4 w-4" /> Create Persona
                 </a>
               </Button>

@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { PersonaState, ChatMessage } from '@/types/persona';
 import PersonaChatPanel from './PersonaChatPanel';
 import PersonaPreviewPanel from './PersonaPreviewPanel';
+import PersonaMethodSelector, { PersonaCreationMethod } from './PersonaMethodSelector';
+import CSVImportForm from './CSVImportForm';
+import AIHistoryImportForm from './AIHistoryImportForm';
 import { Button } from '@/components/ui/button';
 import { savePersonaAction } from '@/app/agents/new/actions';
 import { ResonanceResearchResult } from '@/types/resonance';
@@ -17,11 +20,17 @@ interface ResonanceContext {
 
 interface PersonaBuilderProps {
   resonanceContext?: ResonanceContext | null;
+  initialMethod?: string;
 }
 
 const MAX_MESSAGES_FOR_MODEL = 12;
 
-export default function PersonaBuilder({ resonanceContext }: PersonaBuilderProps) {
+export default function PersonaBuilder({ resonanceContext, initialMethod }: PersonaBuilderProps) {
+  const [selectedMethod, setSelectedMethod] = useState<PersonaCreationMethod | null>(
+    initialMethod && ['ai_chat', 'digital_twin_csv', 'ai_history_import'].includes(initialMethod)
+      ? (initialMethod as PersonaCreationMethod)
+      : null
+  );
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [persona, setPersona] = useState<PersonaState | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,9 +39,9 @@ export default function PersonaBuilder({ resonanceContext }: PersonaBuilderProps
 
   const TURN_LIMIT = 20;
 
-  // Initialize with resonance data if available
+  // Initialize with resonance data if available (only for AI chat method)
   useEffect(() => {
-    if (resonanceContext) {
+    if (resonanceContext && selectedMethod === 'ai_chat') {
       const { blueprint, archetype } = resonanceContext;
       
       // Map resonance data to PersonaState
@@ -65,8 +74,8 @@ export default function PersonaBuilder({ resonanceContext }: PersonaBuilderProps
           content: `I see you're building a persona based on the "${resonanceContext.title}" research. I've pre-filled some details from the "${archetype?.name || 'recommended'}" archetype. How would you like to refine "${blueprint.working_name}" further?`,
         },
       ]);
-    } else {
-      // Default initialization
+    } else if (selectedMethod === 'ai_chat' && !resonanceContext) {
+      // Default initialization for AI chat
       setMessages([
         {
           role: 'assistant',
@@ -75,7 +84,7 @@ export default function PersonaBuilder({ resonanceContext }: PersonaBuilderProps
         },
       ]);
     }
-  }, [resonanceContext]);
+  }, [resonanceContext, selectedMethod]);
 
   const handleUserMessage = async (content: string) => {
     if (!content.trim()) return;
@@ -154,6 +163,32 @@ export default function PersonaBuilder({ resonanceContext }: PersonaBuilderProps
     });
   };
 
+  // Show method selector if no method selected
+  if (!selectedMethod) {
+    return <PersonaMethodSelector onSelectMethod={setSelectedMethod} />;
+  }
+
+  // Show CSV import form
+  if (selectedMethod === 'digital_twin_csv') {
+    return (
+      <CSVImportForm
+        onBack={() => setSelectedMethod(null)}
+        onSuccess={() => {}}
+      />
+    );
+  }
+
+  // Show AI history import form
+  if (selectedMethod === 'ai_history_import') {
+    return (
+      <AIHistoryImportForm
+        onBack={() => setSelectedMethod(null)}
+        onSuccess={() => {}}
+      />
+    );
+  }
+
+  // Show AI chat builder (selectedMethod === 'ai_chat')
   return (
     <div className="flex h-full w-full">
       {/* Left Panel: Chat */}

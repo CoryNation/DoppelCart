@@ -1,67 +1,18 @@
-import PersonaBuilder from '@/components/persona/PersonaBuilder';
-import { createSupabaseServerClient } from "@/lib/supabase/serverClient";
-import { ResonanceResearchResult } from '@/types/resonance';
+import { redirect } from 'next/navigation';
 
-interface ResonanceContext {
-  id: string;
-  title: string;
-  blueprint: ResonanceResearchResult['persona_blueprint'];
-  archetype?: ResonanceResearchResult['winning_persona_archetypes'][0];
-}
-
-async function getResonanceContext(id: string): Promise<ResonanceContext | null> {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) return null;
-
-  const { data, error } = await supabase
-    .from('resonance_research')
-    .select('id, title, result')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single();
-
-  if (error || !data || !data.result) return null;
-
-  const result = data.result as ResonanceResearchResult;
-  
-  return {
-    id: data.id,
-    title: data.title,
-    blueprint: result.persona_blueprint,
-    archetype: result.winning_persona_archetypes?.[0]
-  };
-}
-
+// Redirect old route to new authenticated route
 export default async function NewAgentPage({
   searchParams,
 }: {
   searchParams: Promise<{ fromResearchId?: string }>;
 }) {
   const { fromResearchId } = await searchParams;
-  let resonanceContext: ResonanceContext | null = null;
   
+  // Redirect to new route, preserving query params
+  const params = new URLSearchParams();
   if (fromResearchId) {
-    resonanceContext = await getResonanceContext(fromResearchId);
+    params.set('fromResearchId', fromResearchId);
   }
-
-  return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background">
-      {/* Header */}
-      <header className="flex items-center h-16 px-6 border-b shrink-0 justify-between">
-        <h1 className="text-lg font-semibold">Create Your Agent</h1>
-        {resonanceContext && (
-           <div className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
-             Based on Resonance Research: <span className="font-medium text-foreground">{resonanceContext.title}</span>
-           </div>
-        )}
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-1 overflow-hidden">
-        <PersonaBuilder resonanceContext={resonanceContext} />
-      </main>
-    </div>
-  );
+  
+  redirect(`/personas/new${params.toString() ? `?${params.toString()}` : ''}`);
 }

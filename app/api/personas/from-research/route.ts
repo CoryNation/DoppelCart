@@ -155,9 +155,10 @@ async function generatePersona(payload: {
   finalReport: unknown;
 }): Promise<ResearchPersona> {
   const personaModel =
+    process.env.OPENAI_MODEL_PERSONA ||
     process.env.PERSONA_MODEL ||
     process.env.RESEARCH_REASONING_MODEL ||
-    "gpt-5.1-thinking";
+    "gpt-4o-mini";
 
   const response = await callChatModel({
     messages: [

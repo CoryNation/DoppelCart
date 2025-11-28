@@ -36,6 +36,7 @@ export async function savePersonaAction(persona: PersonaState, resonanceResearch
 
   // Insert into personas table
   const { data: personaData, error: personaError } = await supabase.from('personas').insert({
+    user_id: user.id,
     agent_id: agentId,
     display_name: persona.display_name,
     avatar_image_url: persona.avatar_image_url,
@@ -46,6 +47,8 @@ export async function savePersonaAction(persona: PersonaState, resonanceResearch
     personality: persona.personality,
     biography: persona.biography,
     raw_definition: JSON.stringify(persona),
+    origin_type: 'ai_chat', // AI chat builder method
+    origin_metadata: resonanceResearchId ? { resonance_research_id: resonanceResearchId } : null,
   }).select('id').single();
 
   if (personaError || !personaData) {

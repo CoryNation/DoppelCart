@@ -84,6 +84,41 @@ export interface ResearchPersona {
   callToActionStyles: string[];
 }
 
+export type PersonaOriginType =
+  | "ai_chat"
+  | "digital_twin_csv"
+  | "ai_history_import";
+
+export interface Persona {
+  id: string;
+  user_id: string;
+  display_name: string;
+  avatar_image_url?: string | null;
+  avatar_prompt?: string | null;
+  stats?: PersonaStats | null;
+  goals?: string[] | null;
+  demographics?: PersonaDemographics | null;
+  personality?: PersonaPersonality | null;
+  biography?: string | null;
+  raw_definition?: Record<string, unknown> | null;
+  origin_type?: PersonaOriginType | null;
+  origin_metadata?: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PersonaSourceType = "csv_post_history" | "ai_history_text";
+
+export interface PersonaSource {
+  id: string;
+  persona_id: string;
+  source_type: PersonaSourceType;
+  storage_path: string | null;
+  original_filename: string | null;
+  source_summary: string | null;
+  created_at: string;
+}
+
 
 
 
