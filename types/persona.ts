@@ -87,7 +87,8 @@ export interface ResearchPersona {
 export type PersonaOriginType =
   | "ai_chat"
   | "digital_twin_csv"
-  | "ai_history_import";
+  | "ai_history_import"
+  | "resonance_research";
 
 export interface Persona {
   id: string;

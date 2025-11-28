@@ -5,6 +5,7 @@ import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
 import Button from "@/components/ui/button";
 import { Modal, ModalFooter } from "@/components/ui/modal";
+import { Textarea } from "@/components/ui/textarea";
 import type { ResearchPersona } from "@/types/persona";
 
 interface PersonaFromResearchModalProps {
@@ -26,6 +27,7 @@ export default function PersonaFromResearchModal({
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [additionalClarifications, setAdditionalClarifications] = useState("");
   const MAX_RETRIES = 3;
 
   useEffect(() => {
@@ -36,6 +38,7 @@ export default function PersonaFromResearchModal({
       setIsSaving(false);
       setSaveSuccess(false);
       setRetryCount(0);
+      setAdditionalClarifications("");
     }
   }, [open]);
 
@@ -50,7 +53,10 @@ export default function PersonaFromResearchModal({
       const res = await fetch("/api/personas/from-research", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ researchId }),
+        body: JSON.stringify({ 
+          researchId,
+          additionalClarifications: additionalClarifications.trim() || undefined,
+        }),
       });
 
       if (!res.ok) {
@@ -136,7 +142,7 @@ export default function PersonaFromResearchModal({
   );
 
   return (
-    <Modal
+      <Modal
       isOpen={open}
       onClose={onClose}
       title="Generate Persona from Research"
@@ -196,19 +202,14 @@ export default function PersonaFromResearchModal({
                 Personas area for further editing.
               </p>
             </div>
-            <div className="flex justify-center">
-              <Button
-                onClick={() => handleGenerate(false)}
+            <div className="space-y-2">
+              <Textarea
+                placeholder="Add any additional clarifications or context for persona generation (optional)..."
+                value={additionalClarifications}
+                onChange={(e) => setAdditionalClarifications(e.target.value)}
                 disabled={isGenerating}
-                size="lg"
-              >
-                {isGenerating && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                {isGenerating
-                  ? "Synthesizing persona…"
-                  : "Generate Persona"}
-              </Button>
+                className="min-h-[80px]"
+              />
             </div>
           </div>
         )}

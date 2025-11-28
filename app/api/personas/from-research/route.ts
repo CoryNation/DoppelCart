@@ -113,7 +113,10 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { researchId } = body as { researchId?: string };
+    const { researchId, additionalClarifications } = body as { 
+      researchId?: string;
+      additionalClarifications?: string;
+    };
 
     if (!researchId) {
       return ApiErrors.badRequest("researchId is required");
@@ -137,6 +140,7 @@ export async function POST(req: NextRequest) {
       clarifiedScope: research.clarifiedScope,
       parameters: research.parameters,
       finalReport,
+      additionalClarifications: additionalClarifications?.trim() || undefined,
     });
 
     await attachPersonaToResearchTask(research.id, persona, { userId: user.id });
@@ -153,6 +157,7 @@ async function generatePersona(payload: {
   clarifiedScope: string | null;
   parameters: Record<string, unknown> | null;
   finalReport: unknown;
+  additionalClarifications?: string;
 }): Promise<ResearchPersona> {
   const personaModel =
     process.env.OPENAI_MODEL_PERSONA ||
@@ -160,16 +165,22 @@ async function generatePersona(payload: {
     process.env.RESEARCH_REASONING_MODEL ||
     "gpt-4o-mini";
 
+  const userContent: Record<string, unknown> = {
+    clarifiedScope: payload.clarifiedScope,
+    parameters: payload.parameters,
+    finalReport: payload.finalReport,
+  };
+
+  if (payload.additionalClarifications) {
+    userContent.additionalClarifications = payload.additionalClarifications;
+  }
+
   const response = await callChatModel({
     messages: [
       { role: "system", content: PERSONA_SYSTEM_PROMPT },
       {
         role: "user",
-        content: JSON.stringify({
-          clarifiedScope: payload.clarifiedScope,
-          parameters: payload.parameters,
-          finalReport: payload.finalReport,
-        }),
+        content: JSON.stringify(userContent),
       },
     ],
     model: personaModel,

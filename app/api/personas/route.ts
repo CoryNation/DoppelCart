@@ -49,17 +49,55 @@ export async function POST(req: NextRequest) {
 
     const payload = await req.json();
     const persona = payload?.persona ?? payload;
+    const researchId = payload?.researchId;
 
-    console.info(
-      "[personas] Received persona draft for user",
-      user.id,
-      JSON.stringify(persona).slice(0, 300)
-    );
+    // Map ResearchPersona to personas table structure
+    const personaData = {
+      user_id: user.id,
+      display_name: persona.name || persona.display_name || "Untitled Persona",
+      biography: persona.summary || null,
+      goals: Array.isArray(persona.goals) ? persona.goals : [],
+      demographics: persona.demographics ? {
+        roleOrProfession: persona.demographics.roleOrProfession,
+        experienceLevel: persona.demographics.experienceLevel,
+        organizationContext: persona.demographics.organizationContext,
+        geography: persona.demographics.geography,
+        other: persona.demographics.other,
+      } : null,
+      personality: {
+        painPoints: persona.painPoints || [],
+        motivators: persona.motivators || [],
+        objections: persona.objections || [],
+        preferredChannels: persona.preferredChannels || [],
+        contentPreferences: persona.contentPreferences || {},
+        languageAndVoice: persona.languageAndVoice || {},
+        exampleHooks: persona.exampleHooks || [],
+        callToActionStyles: persona.callToActionStyles || [],
+      },
+      raw_definition: persona,
+      origin_type: researchId ? "resonance_research" : null,
+      origin_metadata: researchId ? { researchId } : null,
+    };
+
+    const { data, error } = await supabase
+      .from("personas")
+      .insert(personaData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error saving persona:", error);
+      return NextResponse.json(
+        { error: "Failed to save persona", details: error.message },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
-      persona,
-      status: "accepted",
-      message: "Persona stub received. Persistence coming soon.",
+      id: data.id,
+      persona: data,
+      status: "saved",
+      message: "Persona saved successfully",
     });
   } catch (error) {
     console.error("Unexpected error in POST /api/personas:", error);

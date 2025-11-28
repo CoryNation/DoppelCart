@@ -73,7 +73,7 @@ export function Modal({
       {/* Modal */}
       <div
         className={cn(
-          "relative z-50 w-full rounded-lg bg-surface-container shadow-xl transition-motion",
+          "relative z-50 w-full max-h-[calc(100vh-2rem)] flex flex-col rounded-lg bg-surface-container shadow-xl transition-motion",
           sizeStyles[size]
         )}
         role="dialog"
@@ -83,7 +83,7 @@ export function Modal({
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between border-b border-border p-6">
+          <div className="flex items-center justify-between border-b border-border p-4 flex-shrink-0">
             {title && (
               <h2 id="modal-title" className="text-h4 text-text-primary">
                 {title}
@@ -105,13 +105,13 @@ export function Modal({
 
         {/* Description */}
         {description && (
-          <p id="modal-description" className="px-6 pt-4 text-body-m text-text-secondary">
+          <p id="modal-description" className="px-4 pt-4 text-body-m text-text-secondary flex-shrink-0">
             {description}
           </p>
         )}
 
         {/* Content */}
-        <div className="p-6">{children}</div>
+        <div className="p-4 overflow-y-auto flex-1 min-h-0">{children}</div>
       </div>
     </div>
   );
@@ -131,7 +131,7 @@ export function ModalFooter({
   return (
     <div
       className={cn(
-        "flex items-center justify-end gap-3 border-t border-border p-6",
+        "flex items-center justify-end gap-3 border-t border-border p-4",
         className
       )}
       {...props}

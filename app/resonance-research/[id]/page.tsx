@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
+import { LayoutDashboard, Users, Search } from "lucide-react";
 
 import { getServerUser } from "@/lib/auth/getServerUser";
 import {
@@ -17,6 +18,7 @@ import Card, {
 import Badge, { type BadgeProps } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import GeneratePersonaFromResearch from "@/components/research/GeneratePersonaFromResearch";
+import AuthenticatedLayoutClient from "@/components/auth/AuthenticatedLayoutClient";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -47,8 +49,27 @@ export default async function ResearchResultPage({ params }: PageProps) {
       ? "This research has not produced a final report yet."
       : undefined;
 
+  const sidebarItems = [
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: <LayoutDashboard className="h-5 w-5" />,
+    },
+    {
+      label: "Personas",
+      href: "/personas",
+      icon: <Users className="h-5 w-5" />,
+    },
+    {
+      label: "Resonance Research",
+      href: "/resonance",
+      icon: <Search className="h-5 w-5" />,
+    },
+  ];
+
   return (
-    <div className="container mx-auto max-w-6xl space-y-8 py-10">
+    <AuthenticatedLayoutClient sidebarItems={sidebarItems}>
+      <div className="container mx-auto max-w-6xl space-y-8 py-10">
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-3">
           <Badge variant={getStatusVariant(research.status)}>
@@ -112,7 +133,8 @@ export default async function ResearchResultPage({ params }: PageProps) {
           <ParametersCard parameters={research.parameters} />
         </aside>
       </div>
-    </div>
+      </div>
+    </AuthenticatedLayoutClient>
   );
 }
 
@@ -508,8 +530,8 @@ function ParametersCard({
           <dl className="space-y-3 text-sm">
             {entries.map(([key, value]) => (
               <div key={key}>
-                <p className="text-xs uppercase text-muted-foreground">
-                  {key}
+                <p className="text-xs font-bold uppercase text-muted-foreground">
+                  {formatParameterKey(key)}
                 </p>
                 <p className="text-sm text-foreground">
                   {formatParameterValue(value)}
@@ -521,6 +543,15 @@ function ParametersCard({
       </CardContent>
     </Card>
   );
+}
+
+function formatParameterKey(key: string): string {
+  // Convert UPPERCASE_WITH_UNDERSCORES to Title Case With Spaces
+  return key
+    .split(/(?=[A-Z])|_/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 }
 
 function formatParameterValue(value: unknown): string {

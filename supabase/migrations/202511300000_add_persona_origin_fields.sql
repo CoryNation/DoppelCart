@@ -18,6 +18,12 @@ create table if not exists public.persona_sources (
 alter table public.persona_sources enable row level security;
 
 -- Create policy: Users can view persona_sources for their own personas
+-- Drop policies if they exist (for idempotent migrations)
+drop policy if exists "Users can view their own persona_sources" on public.persona_sources;
+drop policy if exists "Users can insert their own persona_sources" on public.persona_sources;
+drop policy if exists "Users can update their own persona_sources" on public.persona_sources;
+drop policy if exists "Users can delete their own persona_sources" on public.persona_sources;
+
 create policy "Users can view their own persona_sources"
   on public.persona_sources
   for select

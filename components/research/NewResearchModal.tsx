@@ -339,7 +339,7 @@ export default function NewResearchModal({ open, onClose }: NewResearchModalProp
           : "Running your research…"
       }
     >
-      <div className="space-y-6">
+      <div className="space-y-2">
         {/* Error display */}
         {error && (
           <div className="flex items-start gap-2 p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
@@ -350,7 +350,7 @@ export default function NewResearchModal({ open, onClose }: NewResearchModalProp
 
         {/* Step 1: Title & Description */}
         {step === "TITLE_DESC" && (
-          <div className="space-y-4">
+          <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
               Provide a title and description for your research. We&apos;ll ask a few clarifying
               questions to ensure we scope this correctly.
@@ -382,7 +382,7 @@ export default function NewResearchModal({ open, onClose }: NewResearchModalProp
 
         {/* Step 2: Chat */}
         {step === "CHAT" && (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {/* Summary card */}
             <Card className="p-4 bg-muted/30">
               <div className="space-y-2">
