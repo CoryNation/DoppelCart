@@ -10,7 +10,7 @@ import Card, {
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Download, FileText, Sparkles } from 'lucide-react';
+import { Upload, Download, Sparkles } from 'lucide-react';
 import LinkedInAnalysisResults from './LinkedInAnalysisResults';
 
 interface AnalysisResult {

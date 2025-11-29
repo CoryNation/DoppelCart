@@ -72,7 +72,7 @@ export default function LinkedInAnalysisResults({
               Core Drivers & Motivations
             </CardTitle>
             <CardDescription>
-              What drives this person's actions and decisions
+              What drives this person&apos;s actions and decisions
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -168,7 +168,7 @@ export default function LinkedInAnalysisResults({
               Key Interests, Passions & Growth Areas
             </CardTitle>
             <CardDescription>
-              What they care about and where they're seeking development
+              What they care about and where they&apos;re seeking development
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

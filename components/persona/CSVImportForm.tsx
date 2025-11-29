@@ -9,10 +9,10 @@ import { Upload, ArrowLeft } from 'lucide-react';
 
 interface CSVImportFormProps {
   onBack: () => void;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
-export default function CSVImportForm({ onBack, onSuccess: _onSuccess }: CSVImportFormProps) {
+export default function CSVImportForm({ onBack }: CSVImportFormProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [platformHint, setPlatformHint] = useState('');

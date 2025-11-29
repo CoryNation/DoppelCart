@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     // Use the clarifiedScope as the initial_prompt, and store the full context in input_context
     const initialPrompt = `Clarified Scope:\n${clarifiedScope}\n\nOriginal Description:\n${description}`;
     
-    const { data: resonanceResearch, error: resonanceError } = await supabase
+    const { error: resonanceError } = await supabase
       .from("resonance_research")
       .insert({
         user_id: user.id,
