@@ -214,6 +214,34 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate remaining required fields
+    if (
+      typeof analysisObj.cultivated_persona !== "string" ||
+      typeof analysisObj.definition_of_success !== "string" ||
+      !Array.isArray(analysisObj.guiding_values)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid analysis structure - missing required fields" },
+        { status: 500 }
+      );
+    }
+
+    // Construct properly typed analysis result
+    const typedAnalysisResult: LinkedInAnalysisResult = {
+      core_drivers: {
+        intrinsic: coreDrivers.intrinsic as string[],
+        extrinsic: coreDrivers.extrinsic as string[],
+      },
+      cultivated_persona: analysisObj.cultivated_persona as string,
+      definition_of_success: analysisObj.definition_of_success as string,
+      guiding_values: analysisObj.guiding_values as string[],
+      interests_and_growth: {
+        key_interests: interestsAndGrowth.key_interests as string[],
+        passions: interestsAndGrowth.passions as string[],
+        growth_areas: interestsAndGrowth.growth_areas as string[],
+      },
+    };
+
     // Store the analysis in the database
     const csvMetadata = {
       original_filename: body.original_filename || null,
@@ -227,7 +255,7 @@ export async function POST(req: NextRequest) {
         user_id: user.id,
         title: title.trim(),
         description: description?.trim() || null,
-        analysis_result: analysisObj as LinkedInAnalysisResult,
+        analysis_result: typedAnalysisResult,
         csv_metadata: csvMetadata,
       })
       .select("id, created_at")
@@ -237,7 +265,7 @@ export async function POST(req: NextRequest) {
       console.error("Error saving LinkedIn analysis to database:", dbError);
       // Still return the analysis even if DB save fails
       return NextResponse.json({
-        analysis: analysisObj,
+        analysis: typedAnalysisResult,
         metadata: {
           title,
           description: description || null,
@@ -250,7 +278,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
-      analysis: analysisObj,
+      analysis: typedAnalysisResult,
       analysis_id: analysisData.id,
       metadata: {
         title,
