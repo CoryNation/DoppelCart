@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Card from '@/components/ui/card';
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Copy, Check } from 'lucide-react';
+import { AI_HISTORY_PERSONA_PROMPT } from '@/app/Content/AIHistoryPersonaPrompt';
 
 interface AIHistoryImportFormProps {
   onBack: () => void;
@@ -18,6 +19,43 @@ export default function AIHistoryImportForm({ onBack, onSuccess: _onSuccess }: A
   const [aiHistoryText, setAiHistoryText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [copyPosition, setCopyPosition] = useState({ x: 0, y: 0 });
+  const copyButtonRef = useRef<HTMLButtonElement>(null);
+
+  const handleCopyPrompt = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    
+    // Get button position for animation
+    if (copyButtonRef.current) {
+      const rect = copyButtonRef.current.getBoundingClientRect();
+      setCopyPosition({ x: rect.left + rect.width / 2, y: rect.top - 20 });
+    }
+
+    // Build the prompt with name and description prepended
+    let promptToCopy = '';
+    
+    if (name || description) {
+      promptToCopy += 'PERSONA CONTEXT:\n';
+      if (name) {
+        promptToCopy += `Persona Name: ${name}\n`;
+      }
+      if (description) {
+        promptToCopy += `Purpose/Description: ${description}\n`;
+      }
+      promptToCopy += '\n---\n\n';
+    }
+    
+    promptToCopy += AI_HISTORY_PERSONA_PROMPT.trim();
+
+    try {
+      await navigator.clipboard.writeText(promptToCopy);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,8 +113,13 @@ export default function AIHistoryImportForm({ onBack, onSuccess: _onSuccess }: A
           Back to Method Selection
         </Button>
         <h2 className="text-2xl font-bold">AI History Persona</h2>
-        <p className="text-muted-foreground mt-1">
-          Paste your ChatGPT, Gemini, or other AI conversation history to create a persona that reflects your thinking style
+        <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+          This tool helps you have one AI reverse-engineer you so another AI can become you. 
+          You can optionally add a Persona Name and Description, which will be included in the prompt 
+          to better direct and scope the target AI. Once you've entered your information, copy the 
+          prompt below and paste it into your generative AI tool of choice. The AI will analyze 
+          your conversation history and generate a detailed persona profile that captures your 
+          thinking style, voice, and communication patterns.
         </p>
       </div>
 
@@ -103,18 +146,73 @@ export default function AIHistoryImportForm({ onBack, onSuccess: _onSuccess }: A
             </div>
 
             <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-text-primary">
+                  AI Prompt to Copy
+                </label>
+                <Button
+                  ref={copyButtonRef}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopyPrompt}
+                  className="flex items-center gap-2 relative"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      Copy
+                    </>
+                  )}
+                </Button>
+              </div>
+              {copied && (
+                <div
+                  className="fixed pointer-events-none z-50"
+                  style={{
+                    left: `${copyPosition.x}px`,
+                    top: `${copyPosition.y}px`,
+                    transform: 'translate(-50%, -100%)',
+                    animation: 'fadeInOut 1s ease-in-out',
+                  }}
+                >
+                  <div className="bg-primary text-primary-foreground px-3 py-1 rounded-md text-sm font-medium shadow-lg">
+                    Copied
+                  </div>
+                </div>
+              )}
+              <div className="relative">
+                <textarea
+                  readOnly
+                  value={
+                    (name || description
+                      ? `PERSONA CONTEXT:\n${name ? `Persona Name: ${name}\n` : ''}${description ? `Purpose/Description: ${description}\n` : ''}\n---\n\n`
+                      : '') + AI_HISTORY_PERSONA_PROMPT.trim()
+                  }
+                  className="w-full h-[100px] rounded-md border border-input bg-surface-container-highest px-3 py-2 text-sm text-text-primary resize-none overflow-y-auto font-mono"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Copy this prompt and paste it into your generative AI tool. The prompt includes your Persona Name and Description (if provided) to help guide the analysis.
+              </p>
+            </div>
+
+            <div>
               <Textarea
-                label="AI Conversation History"
-                placeholder="Paste your conversation history from ChatGPT, Gemini, Claude, or any other AI assistant. Include multiple conversations if possible for better results."
+                label="AI Reverse Engineered Output"
+                placeholder="Paste the output from your AI tool here. This should be the JSON response generated by the AI after analyzing your conversation history."
                 value={aiHistoryText}
                 onChange={(e) => setAiHistoryText(e.target.value)}
                 rows={15}
                 required
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Minimum 200 characters. The more content you provide, the better the persona will reflect your style.
-                <br />
-                You can export your history from ChatGPT (Settings → Data Controls → Export), or copy-paste conversations directly.
+                Minimum 200 characters. Paste the complete JSON output from your AI tool after it has analyzed your conversation history.
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Characters: {aiHistoryText.length} / 50,000
@@ -138,6 +236,26 @@ export default function AIHistoryImportForm({ onBack, onSuccess: _onSuccess }: A
           </form>
         </Card>
       </div>
+      <style jsx>{`
+        @keyframes fadeInOut {
+          0% {
+            opacity: 0;
+            transform: translate(-50%, -100%) translateY(-10px);
+          }
+          20% {
+            opacity: 1;
+            transform: translate(-50%, -100%) translateY(0);
+          }
+          80% {
+            opacity: 1;
+            transform: translate(-50%, -100%) translateY(0);
+          }
+          100% {
+            opacity: 0;
+            transform: translate(-50%, -100%) translateY(-10px);
+          }
+        }
+      `}</style>
     </div>
   );
 }

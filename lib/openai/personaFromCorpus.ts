@@ -1,6 +1,7 @@
 import { callChatModel } from "@/lib/openai";
 
 export interface PersonaFromCorpusInput {
+  userName?: string;        // optional persona name from user
   userDescription?: string; // what the user says they want this persona to achieve
   corpusSummary: string;    // preprocessed text from CSV or AI history
   mode: "digital_twin_csv" | "ai_history_import";
@@ -54,7 +55,7 @@ Return JSON ONLY. No markdown, no commentary, no extra text.`;
 export async function generatePersonaFromCorpus(
   input: PersonaFromCorpusInput
 ): Promise<PersonaFromCorpusResult> {
-  const { userDescription, corpusSummary, mode } = input;
+  const { userName, userDescription, corpusSummary, mode } = input;
 
   // Build context-aware user message
   let userMessage = `I'm providing text that reflects my voice, thinking, or content style. `;
@@ -65,8 +66,16 @@ export async function generatePersonaFromCorpus(
     userMessage += `This is based on my AI conversation history, which may be more internal or conceptual. `;
   }
 
-  if (userDescription) {
-    userMessage += `\n\nWhat I want this persona to achieve: ${userDescription}\n\n`;
+  // Add persona context if provided
+  if (userName || userDescription) {
+    userMessage += `\n\nPERSONA CONTEXT:\n`;
+    if (userName) {
+      userMessage += `Persona Name: ${userName}\n`;
+    }
+    if (userDescription) {
+      userMessage += `Purpose/Description: ${userDescription}\n`;
+    }
+    userMessage += `\n`;
   }
 
   userMessage += `\nText corpus:\n${corpusSummary}`;

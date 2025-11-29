@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
 
     // Generate persona from corpus
     const result = await generatePersonaFromCorpus({
+      userName: name,
       userDescription: description,
       corpusSummary: trimmedText,
       mode: "ai_history_import",
