@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Persona Miner</title>
+</head>
+<body>
+  <header class="hdr">
+    <div class="hdr-title">Persona Miner</div>
+    <label class="consent"><input type="checkbox" id="checkboxConsent" /> I have permission.</label>
+  </header>
+
+  <p class="lead">Navigate to the desired person's LinkedIn profile.</p>
+
+  <section class="card">
+    <button id="btnOneClick" class="primary full">⬇ One-Click: Download Everything</button>
+    <p class="hint">On a profile page, saves the resume PDF. On a Recent Activity page, loads more items and exports posts & comments.</p>
+  </section>
+
+  <section class="card">
+    <h2>Resume</h2>
+    <p class="hint">Uses LinkedIn's <em>More → Save to PDF</em> if available; otherwise opens the Print dialog.</p>
+    <button id="btnResumePdf">Create Resume PDF</button>
+  </section>
+
+  <section class="card">
+    <h2>Activity</h2>
+    <div class="row tight">
+      <label>Max minutes <input id="maxMinutes" type="number" min="1" max="10" value="1" /></label>
+      <label>Scroll interval (ms) <input id="intervalMs" type="number" min="200" value="800" /></label>
+    </div>
+    <div class="row">
+      <button id="btnLoadMore">Load More Activity</button>
+      <button id="btnStop" class="secondary">Stop</button>
+    </div>
+    <div class="row">
+      <button id="btnExtractPosts">Download Posts</button>
+      <button id="btnExtractComments">Download Comments</button>
+    </div>
+    <p class="hint">Use on Recent Activity → Posts or Comments.</p>
+  </section>
+
+  <footer>
+    <small>Use responsibly. Visible, user-initiated actions only.</small>
+  </footer>
+
+  <script src="csv.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
+

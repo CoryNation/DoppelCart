@@ -88,7 +88,8 @@ export type PersonaOriginType =
   | "ai_chat"
   | "digital_twin_csv"
   | "ai_history_import"
-  | "resonance_research";
+  | "resonance_research"
+  | "linkedin_analysis";
 
 export interface Persona {
   id: string;
@@ -108,7 +109,7 @@ export interface Persona {
   updated_at: string;
 }
 
-export type PersonaSourceType = "csv_post_history" | "ai_history_text";
+export type PersonaSourceType = "csv_post_history" | "ai_history_text" | "linkedin_csv";
 
 export interface PersonaSource {
   id: string;

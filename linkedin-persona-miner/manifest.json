@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "LinkedIn Persona Miner",
+  "version": "1.0.0",
+  "description": "User-initiated LinkedIn Resume PDF generator and activity (posts/comments) CSV exporter for persona analysis.",
+  "permissions": ["scripting", "activeTab", "downloads", "tabs"],
+  "host_permissions": ["https://www.linkedin.com/*"],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "action": {
+    "default_title": "Persona Miner",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "24": "icon24.png",
+      "32": "icon32.png"
+    }
+  }
+}
+

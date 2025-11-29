@@ -111,6 +111,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Create research task in research_tasks table
     const task = await createResearchTask({
       userId: user.id,
       title,
@@ -120,6 +121,36 @@ export async function POST(req: NextRequest) {
       messages: messages as ResearchChatMessage[],
     });
 
+    // Also create a record in resonance_research table so it shows up on the main page
+    // Use the clarifiedScope as the initial_prompt, and store the full context in input_context
+    const initialPrompt = `Clarified Scope:\n${clarifiedScope}\n\nOriginal Description:\n${description}`;
+    
+    const { data: resonanceResearch, error: resonanceError } = await supabase
+      .from("resonance_research")
+      .insert({
+        user_id: user.id,
+        title,
+        initial_prompt: initialPrompt,
+        input_context: {
+          description,
+          clarifiedScope,
+          parameters,
+          messages,
+          researchTaskId: task.id, // Link to research_tasks table
+        },
+        status: "running",
+      })
+      .select()
+      .single();
+
+    if (resonanceError) {
+      console.error("Error creating resonance_research record:", resonanceError);
+      // Don't fail the request - the research task was created successfully
+      // Just log the error and continue with the task.id
+    }
+
+    // Return the research_tasks id (task.id) as researchId
+    // The resonance_research record is linked via input_context.researchTaskId
     return NextResponse.json({ researchId: task.id });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";

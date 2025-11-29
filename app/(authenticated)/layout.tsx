@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Search } from "lucide-react";
+import { LayoutDashboard, Users, Search, FileText } from "lucide-react";
 import { getServerUser } from "@/lib/auth/getServerUser";
 import AuthenticatedLayoutClient from "@/components/auth/AuthenticatedLayoutClient";
 
@@ -25,6 +25,11 @@ export default async function AuthenticatedLayout({
       label: "Resonance Research",
       href: "/resonance",
       icon: <Search className="h-5 w-5" />,
+    },
+    {
+      label: "LinkedIn Persona Analysis",
+      href: "/linkedin-persona-analysis",
+      icon: <FileText className="h-5 w-5" />,
     },
   ];
 
