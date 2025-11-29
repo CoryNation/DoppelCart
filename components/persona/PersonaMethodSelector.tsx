@@ -22,7 +22,7 @@ export default function PersonaMethodSelector({ onSelectMethod }: PersonaMethodS
     },
     {
       id: 'digital_twin_csv' as PersonaCreationMethod,
-      title: 'Digital Twin from CSV',
+      title: 'Data Dump',
       description: 'Create a persona based on your social media post history',
       icon: <FileSpreadsheet className="h-8 w-8" />,
       features: ['Upload CSV of posts/comments', 'AI analyzes your voice', 'Automatic persona generation'],
@@ -37,7 +37,7 @@ export default function PersonaMethodSelector({ onSelectMethod }: PersonaMethodS
   ];
 
   return (
-    <div className="flex flex-col h-full items-center justify-center p-8 bg-background">
+    <div className="flex flex-col h-full items-center justify-start pt-12 p-8 bg-background">
       <div className="max-w-4xl w-full space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold">Create Your Persona</h1>
@@ -52,7 +52,7 @@ export default function PersonaMethodSelector({ onSelectMethod }: PersonaMethodS
               key={method.id}
               variant="outlined"
               padding="lg"
-              className="hover:shadow-lg transition-shadow cursor-pointer"
+              className="hover:shadow-lg transition-shadow cursor-pointer flex flex-col h-full"
               onClick={() => onSelectMethod(method.id)}
             >
               <CardHeader>
@@ -62,11 +62,11 @@ export default function PersonaMethodSelector({ onSelectMethod }: PersonaMethodS
                 </div>
                 <CardDescription>{method.description}</CardDescription>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-muted-foreground">
+              <CardContent className="flex flex-col flex-1">
+                <ul className="text-sm text-muted-foreground flex-1">
                   {method.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span>
+                    <li key={idx} className="flex items-center gap-2">
+                      <span className="text-primary">•</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -78,7 +78,7 @@ export default function PersonaMethodSelector({ onSelectMethod }: PersonaMethodS
                     onSelectMethod(method.id);
                   }}
                 >
-                  Choose This Method
+                  Select Method
                 </Button>
               </CardContent>
             </Card>
