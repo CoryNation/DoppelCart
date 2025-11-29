@@ -13,7 +13,7 @@ interface AIHistoryImportFormProps {
   onSuccess: () => void;
 }
 
-export default function AIHistoryImportForm({ onBack, onSuccess: _onSuccess }: AIHistoryImportFormProps) {
+export default function AIHistoryImportForm({ onBack }: AIHistoryImportFormProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [aiHistoryText, setAiHistoryText] = useState('');
@@ -116,7 +116,7 @@ export default function AIHistoryImportForm({ onBack, onSuccess: _onSuccess }: A
         <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
           This tool helps you have one AI reverse-engineer you so another AI can become you. 
           You can optionally add a Persona Name and Description, which will be included in the prompt 
-          to better direct and scope the target AI. Once you've entered your information, copy the 
+          to better direct and scope the target AI. Once you&apos;ve entered your information, copy the 
           prompt below and paste it into your generative AI tool of choice. The AI will analyze 
           your conversation history and generate a detailed persona profile that captures your 
           thinking style, voice, and communication patterns.
