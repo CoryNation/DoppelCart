@@ -88,14 +88,23 @@ export async function POST(
 
       return NextResponse.json(updatedResearch);
     } catch (aiError: unknown) {
-      console.error("AI Rerun failed:", aiError);
+      // Enhanced error logging
+      console.error("AI Rerun failed:", {
+        error: aiError,
+        errorType: aiError instanceof Error ? aiError.constructor.name : typeof aiError,
+        errorMessage: aiError instanceof Error ? aiError.message : String(aiError),
+        errorStack: aiError instanceof Error ? aiError.stack : undefined,
+        researchId: id,
+      });
+
+      const errorMessage = aiError instanceof Error ? aiError.message : "Unknown error during AI rerun";
 
       // 4b. Update with failure
       const { error: failUpdateError } = await supabase
         .from("resonance_research")
         .update({
           status: "failed",
-          error_message: aiError instanceof Error ? aiError.message : "Unknown error during AI rerun",
+          error_message: errorMessage,
           last_run_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -105,15 +114,33 @@ export async function POST(
         console.error("Error updating resonance research failure status:", failUpdateError);
       }
 
+      // Provide user-friendly error messages
+      let userMessage = "Resonance research rerun failed";
+      if (errorMessage.includes('API key') || errorMessage.includes('authentication')) {
+        userMessage = 'OpenAI API configuration error. Please contact support.';
+      } else if (errorMessage.includes('rate limit')) {
+        userMessage = 'Service is temporarily busy. Please try again in a moment.';
+      } else if (errorMessage.includes('quota') || errorMessage.includes('billing')) {
+        userMessage = 'Service quota exceeded. Please contact support.';
+      }
+
       return NextResponse.json(
-        { error: "Resonance research rerun failed" },
+        { error: userMessage },
         { status: 500 }
       );
     }
   } catch (error) {
-    console.error("Unexpected error in POST /api/resonance/[id]/rerun:", error);
+    // Enhanced error logging for unexpected errors
+    console.error("Unexpected error in POST /api/resonance/[id]/rerun:", {
+      error,
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorStack: error instanceof Error ? error.stack : undefined,
+    });
+    
+    const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

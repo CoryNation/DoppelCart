@@ -52,8 +52,38 @@ export async function callChatModel(options: {
 
     return content;
   } catch (error) {
-    console.error("Error calling OpenAI:", error);
-    throw error;
+    // Enhanced error handling with detailed messages
+    if (error instanceof Error) {
+      // Check for common OpenAI API errors
+      if (error.message.includes("API key") || error.message.includes("authentication")) {
+        console.error("OpenAI API authentication error:", error.message);
+        throw new Error("OpenAI API key is invalid or missing. Please check your environment variables.");
+      }
+      if (error.message.includes("rate limit") || error.message.includes("429")) {
+        console.error("OpenAI API rate limit error:", error.message);
+        throw new Error("OpenAI API rate limit exceeded. Please try again later.");
+      }
+      if (error.message.includes("model") || error.message.includes("not found")) {
+        console.error("OpenAI API model error:", error.message, "Model:", model);
+        throw new Error(`OpenAI model "${model}" is not available. Please check your model configuration.`);
+      }
+      if (error.message.includes("insufficient_quota") || error.message.includes("billing")) {
+        console.error("OpenAI API billing/quota error:", error.message);
+        throw new Error("OpenAI API quota exceeded or billing issue. Please check your OpenAI account.");
+      }
+      // Log the full error for debugging
+      console.error("Error calling OpenAI API:", {
+        message: error.message,
+        model,
+        responseFormatType: options.responseFormatType,
+        errorName: error.name,
+        stack: error.stack,
+      });
+      throw new Error(`OpenAI API error: ${error.message}`);
+    }
+    // Unknown error type
+    console.error("Unknown error calling OpenAI:", error);
+    throw new Error("An unexpected error occurred while calling OpenAI API.");
   }
 }
 

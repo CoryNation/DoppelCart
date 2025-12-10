@@ -122,10 +122,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(typedContent);
 
   } catch (error: unknown) {
-    console.error('Error in persona builder API:', error);
+    // Enhanced error logging
+    console.error('Error in persona builder API:', {
+      error,
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorStack: error instanceof Error ? error.stack : undefined,
+    });
+    
     const errorMessage = error instanceof Error ? error.message : 'Internal Server Error';
+    
+    // Provide user-friendly error messages
+    let userMessage = errorMessage;
+    if (errorMessage.includes('API key') || errorMessage.includes('authentication')) {
+      userMessage = 'OpenAI API configuration error. Please contact support.';
+    } else if (errorMessage.includes('rate limit')) {
+      userMessage = 'Service is temporarily busy. Please try again in a moment.';
+    } else if (errorMessage.includes('quota') || errorMessage.includes('billing')) {
+      userMessage = 'Service quota exceeded. Please contact support.';
+    }
+    
     return NextResponse.json(
-      { error: errorMessage },
+      { error: userMessage },
       { status: 500 }
     );
   }
